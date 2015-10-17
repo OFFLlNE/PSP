@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileInputStream;
 import java.io.File;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
- 
-
-
-
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -23,17 +20,17 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -43,357 +40,320 @@ import javafx.scene.shape.Rectangle;
 class BlockButton extends ToggleButton{
         public int i;
 }
- 
- 
- 
- 
- 
+
 public class Main extends Application {
-       
-    final Stage stage2 = new Stage();
-   
-        //LAIMIS
-        static boolean started = false;
-        static Plokk ui = null;
-        //LAIMIS END
-       
-        static int currentTool = 0;
-        static GridPane level = new GridPane();
-        static GridPane level2 = new GridPane();
-        public static Deque<Integer> l2 = new ArrayDeque<Integer>();
-        final Label silt4 = new Label();
-        static Label silt5 = new Label();
-        final static Label parkimiskohadSilt = new Label();
- 
-        static int murphyPosX;
-        static int murphyPosY;
- 
-        static int parkimiskohad1 = 0;
-        static int parkimiskohad2 = 0;
-       
-        static int mouseX;
-        static int mouseY;
- 
-        static int leveli_laius = 240;
-        static int leveli_kõrgus = 100;
- 
-        static int pintsli_laius = 4;
-        static int pintsli_kõrgus = 3;
-        static int pl = 0;
-        static int pk = 0;
-       
-        static int pildiLaius = leveli_laius*Plokk.suurus;
-        static int pildiKõrgus = leveli_kõrgus*Plokk.suurus;
-       
-        static int vanaSuurus = Plokk.suurus;
-       
-        static SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.YYYY");
- 
-        static Plokk[][] plokid = new Plokk[leveli_laius][leveli_kõrgus];
-        static Plokk[][] plokid2 = new Plokk[leveli_laius][leveli_kõrgus];
-       
-        BlockButton button_tool_place;
-        BlockButton button_tool_fill;
-        BlockButton button_tool_laimis;
-        BlockButton button_tool_custom_brush_size;
-       
-        static ArrayList<String> files = new ArrayList<String>();
- 
-       
-    class Käsitleja implements EventHandler<MouseEvent> {
-        Plokk a;
-       
-        public Käsitleja(Plokk a) {
-                this.a = a;
-                }
- 
-                public void handle(MouseEvent me) {
-            if (me.getEventType()==MouseEvent.MOUSE_ENTERED)
-                {
-               
-                if (button_tool_fill.isSelected()){
-                        //märgiNaabrid(a, Color.AQUA, a.nr, false, 0, level);
-                }
-                if (a.nr != 6){
-                        a.setFill(Color.AQUAMARINE);
-                }
-                //märgiTeatud(a, Color.AQUA, a.nr, 4);
- 
-                mouseX = a.x;
-                mouseY = a.y;
-               
-                silt4.setText("(" + a.x + ", " + a.y + ")");
-               
- 
-                        if (button_tool_custom_brush_size.isSelected()){
-                               
- 
-                        for(int i = 0; i< pintsli_laius; i++){
-                                for(int j = 0; j< pintsli_kõrgus; j++){
-                                       
-                                       
-                                       
-                                        ((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
-                                }
-                        }
-                       
-                       
-                       
-                }      
-               
-               
-                }
-           
-           
-           
-           
-            else if (me.getEventType()==MouseEvent.MOUSE_CLICKED)
-                {
-         
-               
-                if (button_tool_fill.isSelected()){
-                        märgiNaabrid(a, Color.AQUA, a.nr, true, currentTool, level);
-                }
-               
-                        //if (a.x != 0 & a.y != 0 & a.x != 59 & a.y != 23 ) {
-                                asendaplokk(currentTool, a.x, a.y, level);
-                        //      };
-                               
-                               
-                        if (button_tool_laimis.isSelected()){
-                               
-                                //LAIMIS               
-                        if (started == false){
-                                        started = true;
-                                        ui = a;
-                        }
-                        else{
-                                int algusX = ui.x;
-                                int algusY = ui.y;
-                                int loppX = a.x;
-                                int loppY = a.y;
-                                started = false;
-                               
-                                for(int i = 0; i< Math.abs(ui.x - a.x)+1; i++){
-                                        for(int j = 0; j< Math.abs(ui.y - a.y)+1; j++){
-                                               
- 
-                                                        asendaplokk(currentTool, a.x+i, a.y+j, level);
-//                                              Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
-                                               
-                                }
-                                }
-                               
-                        }
-                        //LAIMIS END
-                               
-                        }      
-                       
-                        if (button_tool_custom_brush_size.isSelected()){
-                                boolean pTäht = false;
- 
-                                for(int i = 0; i< pintsli_laius; i++){
-                                        for(int j = 0; j< pintsli_kõrgus; j++){
-                                               
-                                               
-                                                if (currentTool == 1){
-                                                        if (i==0&&j==0){
-                                                                asendaplokk(7, a.x+i, a.y+j, level);
-                                                        }
-                                                        else if (i==0&&j==pintsli_kõrgus-1){
-                                                                asendaplokk(10, a.x+i, a.y+j, level);
-                                                        }
-                                                        else if (i==pintsli_laius-1&&j==0){
-                                                                asendaplokk(8, a.x+i, a.y+j, level);
-                                                        }
-                                                        else if (i==pintsli_laius-1&&j==pintsli_kõrgus-1){
-                                                                asendaplokk(9, a.x+i, a.y+j, level);
-                                                        }
-                                                       
-                                                        else if (i==0|| i==pintsli_laius-1){
-                                                                asendaplokk(11, a.x+i, a.y+j, level);
-                                                        }
-                                                        else if(j==0||j==pintsli_kõrgus-1){
-                                                                asendaplokk(12, a.x+i, a.y+j, level);
-                                                        }
-                                                        else if (!pTäht){
-                                                                pTäht=true;
-                                                                asendaplokk(1, a.x+i, a.y+j, level);
-                                                        }
-                                                        else{
-                                                                asendaplokk(13, a.x+i, a.y+j, level);
-                                                        }
-                                                       
-                                                       
-                                                }
-                                                else{
-                                               
-                                                        asendaplokk(currentTool, a.x+i, a.y+j, level);
-//                                              Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
-                                                }
-                                }
-                                }
-                               
-                        }      
-                       
-                       
-                               
-                }
-       
-             
-            else {
-                mouseX = a.x;
-                mouseY = a.y;      
-               
-                if (button_tool_fill.isSelected() && a.nr != 6){
-                        märgiNaabrid(a, a.see, a.nr, false, 0, level);
-                }
- 
-                //märgiTeatud(a, a.see, a.nr, 4);
-                if (a.nr != 6){
-                        a.setFill(a.see);
-                }
-               
-                        if (button_tool_custom_brush_size.isSelected()){
-                               
- 
-                        for(int i = 0; i< pintsli_laius; i++){
-                                for(int j = 0; j< pintsli_kõrgus; j++){
-                                        ((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
-                                }
-                        }
-                }
-               
-               
-            }
-        }      
+	
+	// default values
+	static int level_width = 240;
+	static int level_height = 100;
+
+	static int pencil_width = 5;
+	static int pencil_height = 3;
+
+	static SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss dd.MM.YYYY");
+
+	//
+
+	final Stage stage2 = new Stage();
+	final Stage stage3 = new Stage();
+
+	//LAIMIS
+	static boolean started = false;
+	static Plokk ui = null;
+	//LAIMIS END
+
+	public static Deque<Integer> l2 = new ArrayDeque<Integer>();
+
+	static int currentTool = 0;
+	static GridPane level = new GridPane();
+	static GridPane level2 = new GridPane();
+	final Label label_mouse_cordinates = new Label();
+	static Label silt5 = new Label();
+
+	final static Label label_newUI_parkingSlots = new Label();
+	final static Label label_newUI_robotSlots = new Label();
+
+	static int number_of_parking_slots_1 = 0;
+	static int number_of_parking_slots_2 = 0;
+
+	static int mouseX;
+	static int mouseY;
+
+	static int pildiLaius = level_width*Plokk.suurus;
+	static int pildiKõrgus = level_height*Plokk.suurus;
+
+	static int vanaSuurus = Plokk.suurus;
+
+
+	static Plokk[][] plokid = new Plokk[level_width][level_height];
+	static Plokk[][] plokid2 = new Plokk[level_width][level_height];
+	
+	static ArrayList<Integer> legal_blocks = new ArrayList<Integer>();
+
+	BlockButton button_tool_place;
+	BlockButton button_tool_fill;
+	BlockButton button_tool_laimis;
+	BlockButton button_tool_custom_brush_size;
+
+	static ArrayList<String> files = new ArrayList<String>();
+
+
+	class MouseEvent_Handler implements EventHandler<MouseEvent> {
+		Plokk a;
+
+		public MouseEvent_Handler(Plokk a) {
+			this.a = a;
+		}
+
+		public void handle(MouseEvent me) {
+			if (me.getEventType()==MouseEvent.MOUSE_ENTERED)
+			{
+
+				if (button_tool_fill.isSelected()){
+					//mark_neighbours(a, Color.AQUA, a.nr, false, 0, level);
+				}
+				if (a.nr != 6){
+					a.setFill(Color.AQUAMARINE);
+				}
+				//märgiTeatud(a, Color.AQUA, a.nr, 4);
+
+				mouseX = a.x;
+				mouseY = a.y;
+
+				label_mouse_cordinates.setText("(" + a.x + ", " + a.y + ")");
+
+
+				if (button_tool_custom_brush_size.isSelected()){
+
+
+					for(int i = 0; i< pencil_width; i++){
+						for(int j = 0; j< pencil_height; j++){
+							((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
+						}
+					}
+
+				}      
+
+			}
+
+			else if (me.getEventType()==MouseEvent.MOUSE_CLICKED)
+			{
+
+
+				if (button_tool_fill.isSelected()){
+					mark_neighbours(a, Color.AQUA, a.nr, true, currentTool, level);
+				}
+
+				//if (a.x != 0 & a.y != 0 & a.x != 59 & a.y != 23 ) {
+				replace_block(currentTool, a.x, a.y, level);
+				//      };
+
+
+				if (button_tool_laimis.isSelected()){
+
+					//LAIMIS               
+					if (started == false){
+						started = true;
+						ui = a;
+					}
+					else{
+						started = false;
+
+						for(int i = 0; i< Math.abs(ui.x - a.x)+1; i++){
+							for(int j = 0; j< Math.abs(ui.y - a.y)+1; j++){
+
+
+								replace_block(currentTool, a.x+i, a.y+j, level);
+								//Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
+
+							}
+						}
+
+					}
+					//LAIMIS END
+
+				}      
+
+				if (button_tool_custom_brush_size.isSelected()){
+					boolean pTäht = false;
+
+					for(int i = 0; i< pencil_width; i++){
+						for(int j = 0; j< pencil_height; j++){
+
+
+							if (currentTool == Plokk._PARKING_P){
+								if (i==0&&j==0){
+									replace_block(Plokk._PARKING_TOP_LEFT, a.x+i, a.y+j, level);
+								}
+								else if (i==0&&j==pencil_height-1){
+									replace_block(Plokk._PARKING_BOT_LEFT, a.x+i, a.y+j, level);
+								}
+								else if (i==pencil_width-1&&j==0){
+									replace_block(Plokk._PARKING_TOP_RIGHT, a.x+i, a.y+j, level);
+								}
+								else if (i==pencil_width-1&&j==pencil_height-1){
+									replace_block(Plokk._PARKING_BOT_RIGHT, a.x+i, a.y+j, level);
+								}
+
+								else if (i==0|| i==pencil_width-1){
+									replace_block(Plokk._PARKING_BORDER_SIDE, a.x+i, a.y+j, level);
+								}
+								else if(j==0||j==pencil_height-1){
+									replace_block(Plokk._PARKING_BORDER_TOPBOT, a.x+i, a.y+j, level);
+								}
+								else if (!pTäht){
+									pTäht=true;
+									replace_block(Plokk._PARKING_P, a.x+i, a.y+j, level);
+								}
+								else{
+									replace_block(Plokk._PARKING_FILLED_BLUE, a.x+i, a.y+j, level);
+								}
+
+
+							}
+							else{
+
+								replace_block(currentTool, a.x+i, a.y+j, level);
+								//Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
+							}
+						}
+					}
+
+				}      
+
+
+
+			}
+
+
+			else {
+				mouseX = a.x;
+				mouseY = a.y;      
+
+				if (button_tool_fill.isSelected() && a.nr != 6){
+					mark_neighbours(a, a.see, a.nr, false, 0, level);
+				}
+
+				//märgiTeatud(a, a.see, a.nr, 4);
+				if (a.nr != 6){
+					a.setFill(a.see);
+				}
+
+				if (button_tool_custom_brush_size.isSelected()){
+
+
+					for(int i = 0; i< pencil_width; i++){
+						for(int j = 0; j< pencil_height; j++){
+							((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
+						}
+					}
+				}
+
+
+			}
+		}      
+	}
+
+
+	class MouseEvent_Drag_Handler implements EventHandler<MouseEvent> {
+		GridPane a;
+
+		public MouseEvent_Drag_Handler(GridPane a) {
+			this.a = a;
+		}
+
+		public void handle(MouseEvent me) {
+			if (me.getEventType()==MouseEvent.MOUSE_DRAGGED)
+			{
+
+				//if ((int)me.getX()/Plokk.suurus != 0 & (int)me.getY()/Plokk.suurus != 0 & (int)me.getX()/Plokk.suurus != 59 & (int)me.getY()/Plokk.suurus != 23 ) {
+
+				//((Plokk) getNodeFromGridPane(level, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus)  ).muuda(currentTool);
+				if (!button_tool_custom_brush_size.isSelected()){
+					replace_block(currentTool, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus, level);
+				}
+				//};
+
+				label_mouse_cordinates.setText("(" + (int)me.getX()/Plokk.suurus + ", " + (int)me.getY()/Plokk.suurus + ")");
+
+
+
+			}
+		}      
+	}
+    
+    // FILL ALGORITHM
+    public static Deque<Plokk> to_mark = new ArrayDeque<Plokk>();
+    public static void mark_neighbours(Plokk a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl){
+    	if (a.nr != eelmine){
+
+    		//System.out.println("ok!");
+    	}
+
+
+    	Plokk W = neighbourW(a.x, a.y, lvl);
+    	Plokk S = neighbourS(a.x, a.y, lvl);
+    	Plokk E = neighbourE(a.x, a.y, lvl);
+    	Plokk N = neighbourN(a.x, a.y, lvl);
+
+    	if (a.nr != 6){
+    		a.setFill(b);
+    	}
+
+    	if (kasAsendada){
+    		//System.out.println("värvida: " + a.x + ", " + a.y);
+    		replace_block(tool, a.x, a.y, lvl);
+    	}
+
+    	if (!kasAsendada){
+    		if (!W.getFill().equals(b) && W.nr == eelmine && W != null) { to_mark.push(W);};
+    		if (!S.getFill().equals(b) && S.nr == eelmine && S != null  ) {         to_mark.push(S);};
+    		if (!E.getFill().equals(b) && E.nr == eelmine && E != null  ) {         to_mark.push(E);};
+    		if (!N.getFill().equals(b) && N.nr == eelmine && N != null  ) {         to_mark.push(N);};
+    	}
+    	else{
+    		if (W.nr != a.nr && W.nr == eelmine && W != null) { to_mark.push(W);};
+    		if (S.nr != a.nr  &&  S.nr == eelmine && S != null  ) {         to_mark.push(S);};
+    		if (E.nr != a.nr &&  E.nr == eelmine && E != null  ) {          to_mark.push(E);};
+    		if (N.nr != a.nr && N.nr == eelmine && N != null  ) {           to_mark.push(N);};
+    	}
+
+
+
+
+    	try{ 
+    		mark_neighbours(to_mark.pop(), b, eelmine, kasAsendada, tool, lvl);
+    	}
+
+    	catch(Exception e){
+    		new Alert(Alert.AlertType.ERROR, "Tere", ButtonType.OK);
+    		//System.out.println(e);
+    		to_mark.clear();
+    		return;
+    	}
+
     }
-       
-   
-    class Käsitleja2 implements EventHandler<MouseEvent> {
-        GridPane a;
-       
-        public Käsitleja2(GridPane a) {
-                this.a = a;
-                }
- 
-                public void handle(MouseEvent me) {
-            if (me.getEventType()==MouseEvent.MOUSE_DRAGGED)
-                {
-               
-                        //if ((int)me.getX()/Plokk.suurus != 0 & (int)me.getY()/Plokk.suurus != 0 & (int)me.getX()/Plokk.suurus != 59 & (int)me.getY()/Plokk.suurus != 23 ) {
- 
-                        //((Plokk) getNodeFromGridPane(level, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus)  ).muuda(currentTool);
-                        asendaplokk(currentTool, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus, level);
-                        //};
- 
-                silt4.setText("(" + (int)me.getX()/Plokk.suurus + ", " + (int)me.getY()/Plokk.suurus + ")");
- 
-               
-               
-                }
-            else {
-               
-            }
-        }      
-    }
-       
-//    //LAIMIS
-//    Class ModifiedParkla{
-//      oldxstart = ...
-//      oldxend = ...
-//      oldystart = ...
-//      oldyend = ...
-//     
-//      newxstart = ...
-//              newxend = ...
-//              newystart = ...
-//              newyend = ...
-//    }
-//    
-//    updateObject(modifiedParkla)
-//    
-//    updateObject(object){
-//      modifiedParkla.getOldCubes.SetInvisible;
-//      modifiedParkla.getNewCubes.SetParkla;
-//    }
-    //LAIMIS END
-   
-    public static Deque<Plokk> märgitavad = new ArrayDeque<Plokk>();
-   
-    public static void märgiNaabrid(Plokk a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl){
-        if (a.nr != eelmine){
- 
-                //System.out.println("ok!");
-        }
-       
-        try{
-        Plokk W = naaberW(a.x, a.y, lvl);
-        Plokk S = naaberS(a.x, a.y, lvl);
-        Plokk E = naaberE(a.x, a.y, lvl);
-        Plokk N = naaberN(a.x, a.y, lvl);
- 
-        if (a.nr != 6){
-                a.setFill(b);
-        }
-       
-        if (kasAsendada){
-                //System.out.println("värvida: " + a.x + ", " + a.y);
-                        asendaplokk(tool, a.x, a.y, lvl);
-        }
-       
-        if (!kasAsendada){
-                if (!W.getFill().equals(b) && W.nr == eelmine && W != null) { märgitavad.push(W);};
-                if (!S.getFill().equals(b) && S.nr == eelmine && S != null  ) {         märgitavad.push(S);};
-                if (!E.getFill().equals(b) && E.nr == eelmine && E != null  ) {         märgitavad.push(E);};
-                if (!N.getFill().equals(b) && N.nr == eelmine && N != null  ) {         märgitavad.push(N);};
-        }
-        else{
-                if (W.nr != a.nr && W.nr == eelmine && W != null) { märgitavad.push(W);};
-                if (S.nr != a.nr  &&  S.nr == eelmine && S != null  ) {         märgitavad.push(S);};
-                if (E.nr != a.nr &&  E.nr == eelmine && E != null  ) {          märgitavad.push(E);};
-                if (N.nr != a.nr && N.nr == eelmine && N != null  ) {           märgitavad.push(N);};
-        }
- 
- 
-       
-                märgiNaabrid(märgitavad.pop(), b, eelmine, kasAsendada, tool, lvl);
-        }
-       
-                catch(Exception e){
-                	new Alert(Alert.AlertType.ERROR, "Tere", ButtonType.OK);
-                        //System.out.println(e);
-                	märgitavad.clear();
-                        return;
-                }
-               
-               
-               
-               
-       
-               
-    }
+
    
    
    
-   
-    public static Plokk naaberS(int x, int y, GridPane lvl){
+    public static Plokk neighbourS(int x, int y, GridPane lvl){
         return (Plokk)getNodeFromGridPane(lvl, x, y+1);
        
     }
    
-    public static Plokk naaberW(int x, int y, GridPane lvl){
+    public static Plokk neighbourW(int x, int y, GridPane lvl){
         return (Plokk)getNodeFromGridPane(lvl, x+1, y);
        
     }
    
    
-    public static Plokk naaberE(int x, int y, GridPane lvl){
+    public static Plokk neighbourE(int x, int y, GridPane lvl){
         return (Plokk)getNodeFromGridPane(lvl, x-1, y);
        
     }
    
-    public static Plokk naaberN(int x, int y, GridPane lvl){
+    public static Plokk neighbourN(int x, int y, GridPane lvl){
         return (Plokk)getNodeFromGridPane(lvl, x, y-1);
        
     }
@@ -424,84 +384,60 @@ public class Main extends Application {
     }
    
  
-        public static String loeLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
+        public static void loadLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException, WrongFileException {
                 silt5.setText("Laen...");
-               
                 RandomAccessFile r = new RandomAccessFile("levels/"+fail, "r");
- 
- 
-               
-               
                 mitmes--;
-               
- 
                 r.skipBytes(mitmes*1536);
- 
-               
-               
-                for(int i = 1; i<=leveli_kõrgus; i++){
-                        for(int j = 1; j<=leveli_laius; j++){
+                for(int i = 1; i<=level_height; i++){
+                        for(int j = 1; j<=level_width; j++){
+                        		
                                 int a = r.read();
+                                if (legal_blocks.contains(a)){
                                 //System.out.println("("+ i + ", " + j + ") - " + a);
-                       
-                                l2.add(a);
-                       
+                                	l2.add(a);
+                                }
+                                else{
+                                	r.close();
+                                	throw new WrongFileException();
+                                }
                         }
                         //System.out.println();
-                       
                 }
-               
                 r.close();
                
                 silt5.setText("Laetud! - " + df.format(System.currentTimeMillis() )  );
-               
- 
-           
-                return "";
         }
        
        
        
-        public static String salveLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
+        public static void saveLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
                 silt5.setText("Salvestan...");
                 RandomAccessFile r = new RandomAccessFile("levels/"+fail, "rw");
                 //mitmes--;
                 System.out.println("salvestan");
                 //r.skipBytes(mitmes*1536);
-                for(int i = 0; i<=leveli_kõrgus-1; i++){
- 
-                        for(int j = 0; j<=leveli_laius-1; j++){
-                               
-                               
-                               
-                        //System.out.println("("+ i + ", " + j + ") - " + a);
-                        //System.out.println((Plokk) getNodeFromGridPane(level, j, i));
-                        r.write(         ((Plokk) getNodeFromGridPane(level, j, i)).nr              );
-                       
+                for(int i = 0; i<=level_height-1; i++){
+                        for(int j = 0; j<=level_width-1; j++){
+                        	//System.out.println("("+ i + ", " + j + ") - " + a);
+                        	//System.out.println((Plokk) getNodeFromGridPane(level, j, i));
+                        	r.write(         ((Plokk) getNodeFromGridPane(level, j, i)).nr              );
                         }
                         //System.out.println();
-                       
                 }
-               
-               
                 r.close();
                 silt5.setText("Salvestatud! - " + df.format(System.currentTimeMillis() )  );
- 
-                return "";
         }
        
+
        
- 
-       
-       
-       
-        public void lisaplokk(int nr, int j, int i, GridPane lvl){
+        public void add_block(int nr, int j, int i, GridPane lvl){
                 Plokk r = new Plokk(   nr, j, i  );
                
                 if (lvl == level ){
-                        r.addEventHandler(MouseEvent.MOUSE_ENTERED, new Käsitleja(r));
-                        r.addEventHandler(MouseEvent.MOUSE_CLICKED, new Käsitleja(r));
-                        r.addEventHandler(MouseEvent.MOUSE_EXITED, new Käsitleja(r));
+                        r.addEventHandler(MouseEvent.MOUSE_ENTERED, new MouseEvent_Handler(r));
+                        r.addEventHandler(MouseEvent.MOUSE_CLICKED, new MouseEvent_Handler(r));
+                        r.addEventHandler(MouseEvent.MOUSE_EXITED, new MouseEvent_Handler(r));
                 }
                 //if (j == 0|| i == 0 || j == 59 || i == 23 ) {r.mouseTransparentProperty().set(true);;};
  
@@ -517,441 +453,682 @@ public class Main extends Application {
 //              level.add(rl, j, i);
                
                 if (nr == 1){
-                        if (lvl == level){
-                                parkimiskohad1++;
-                        }else{
-                                parkimiskohad2++;
-                }
-               
- 
-                        parkimiskohadSilt.setText("Parkimiskohti joonistusel: " + parkimiskohad1 + ", parkimiskohti robotparklas: " + parkimiskohad2 + "");
+                    if (lvl == level){
+                        number_of_parking_slots_1++;
+                    }else{
+                        number_of_parking_slots_2++;
+                    }
+                    updateParkingLabels();
                 }
                
         }
        
+        public static void add_block2(int nr, int j, int i){
+            Plokk r = new Plokk(   nr, j, i  );
+           
+            level2.add(r, j, i);
+            plokid2[j][i] = r;
+           
+            if (nr == 1){
+                number_of_parking_slots_2++;
+                updateParkingLabels();
+            }
+           
+    }       
        
-       
-        public static void asendaplokk(int nr, int j, int i, GridPane lvl){
+        public static void replace_block(int nr, int j, int i, GridPane lvl){
                 Plokk muudetav = (Plokk) getNodeFromGridPane(lvl, j, i);
                
                 if (nr == 1){
                         if (lvl == level){
-                                parkimiskohad1++;
+                                number_of_parking_slots_1++;
                         }else{
-                                parkimiskohad2++;
+                                number_of_parking_slots_2++;
                         }
                 }
                
                 if (muudetav.nr == 1){
                         if (lvl == level){
-                                parkimiskohad1--;
+                                number_of_parking_slots_1--;
                         }else{
-                                parkimiskohad2--;
+                                number_of_parking_slots_2--;
                 }
                 }
                
                 if (muudetav.nr != 6){
                        
- 
                         muudetav.muuda(nr);
                
-               
-               
-               
                 }
-                parkimiskohadSilt.setText("Parkimiskohti joonistusel: " + parkimiskohad1 + ", parkimiskohti robotparklas: " + parkimiskohad2 + "");
+                updateParkingLabels();
+                //number_of_parking_slots_Silt.setText("Parkimiskohti joonistusel: " + number_of_parking_slots_1 + ", parkimiskohti robotparklas: " + number_of_parking_slots_2 + "");
                
         }
        
        
         public void readTextures() throws  FileNotFoundException{
-                System.out.println("reading textures...");
+                //System.out.println("reading textures...");
                 Plokk.textures[0] = Color.BLACK;
                
                 for (int i = 1; i<14; i++){
+                		legal_blocks.add(i);
                         Plokk.textures[i] = new ImagePattern(new Image(new FileInputStream(new File(i + ".png"))));
                 }
                
- 
-                System.out.println("Done!");
+                //System.out.println("Done!");
         }
        
+        public static void updateParkingLabels(){
+
+            label_newUI_parkingSlots.setText("Number of regular parking slots: " + number_of_parking_slots_1);
+            label_newUI_robotSlots.setText("Number of robot parking slots: " + number_of_parking_slots_2 );
+        }
+        
+        
+        public static void makeGenericLevel(){       
+        	for(int i = 1; i<=level_height; i++){
+        		for(int j = 1; j<=level_width; j++){
+        			if (i == 1 || i==level_height || j==1 || j==level_width){
+        				l2.add(6);
+        			}
+        			else{
+        				l2.add(2);
+        			}
+
+        		}
+        		//System.out.println();
+
+        	}
+        }
+        
+        // delete all objects. redraw them
+        public void reset(){
+
+			number_of_parking_slots_1 = 0;
+			number_of_parking_slots_2 = 0;
+			for(int i = 0; i<=level_height-1; i++){
+				for(int j = 0; j<=level_width-1; j++){
+					l2.add(((Plokk) getNodeFromGridPane(level, j, i)).nr);
+				}
+			} 
+			level.getChildren().removeAll(level.getChildren());
+			for(int i = 0; i<level_height; i++){
+				for(int j = 0; j<level_width; j++){
+					add_block(   l2.pop(), j, i, level  );         
+				}
+			}
+			for(int i = 0; i<=level_height-1; i++){
+				for(int j = 0; j<=level_width-1; j++){
+					l2.add(((Plokk) getNodeFromGridPane(level2, j, i)).nr);
+				}
+			} 
+			level2.getChildren().removeAll(level2.getChildren());
+			for(int i = 0; i<level_height; i++){
+				for(int j = 0; j<level_width; j++){
+					add_block(   l2.pop(), j, i, level2  );         
+				}
+			}
+        }
+        
         @Override
         public void start(final Stage primaryStage) throws  FileNotFoundException, IOException, ClassNotFoundException {
                
-                readTextures();
+            readTextures();
                
-                Runtime runtime = Runtime.getRuntime();
-            NumberFormat format = NumberFormat.getInstance();
-            StringBuilder sb = new StringBuilder();
-            long maxMemory = runtime.maxMemory();
-            long allocatedMemory = runtime.totalMemory();
-            long freeMemory = runtime.freeMemory();
-            sb.append("\nfree memory: " + format.format(freeMemory / 1024) + "\n");
-            sb.append("allocated memory: " + format.format(allocatedMemory / 1024) + "\n");
-            sb.append("max memory: " + format.format(maxMemory / 1024) + "\n");
-            sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024) + "\n\n");
-            System.out.println(sb);
+//            Runtime runtime = Runtime.getRuntime();
+//            NumberFormat format = NumberFormat.getInstance();
+//            StringBuilder sb = new StringBuilder();
+//            long maxMemory = runtime.maxMemory();
+//            long allocatedMemory = runtime.totalMemory();
+//            long freeMemory = runtime.freeMemory();
+//            sb.append("\nfree memory: " + format.format(freeMemory / 1024) + "\n");
+//            sb.append("allocated memory: " + format.format(allocatedMemory / 1024) + "\n");
+//            sb.append("max memory: " + format.format(maxMemory / 1024) + "\n");
+//            sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024) + "\n\n");
+//            System.out.println(sb);
              
-                GridPane root = new GridPane();
-               
-                GridPane ruudustik = new GridPane();
-            final TextField väli = new TextField();
+            GridPane root = new GridPane();
+            final Scene scene = new Scene(root,1600,900);
+            primaryStage.setTitle("PitStop Parking");
+            primaryStage.setScene(scene);
+            
+            
+            // load dialog
+            GridPane ruudustik = new GridPane();
             Label silt = new Label("Level: ");
             final Button nupp = new Button("Open");
-            final TextField väli_level_filename = new TextField();
-           
-            Label label_tool = new Label("Tool: ");
+            final TextField field_level_filename = new TextField();
+            
+            
+            // vv OLD UI
             final TextField väli_selected_block_tool = new TextField();
+            
+            GridPane oldUI_block_toolbar_gridpane = new GridPane();
+
+            ToggleGroup BlockButtons = new ToggleGroup();
+
+            // block selection toolbar for old UI
+            for (int i = 0; i<14; i++){
+
+            	if (i < 41 ){
+            		final BlockButton temp = new BlockButton();
+            		temp.i = i;
+            		//oldUI_block_toolbar_gridpane.getChildren().add(temp);
+            		//StackPane.setMargin(temp, new Insets(0, 0, 0, 0));
+
+            		oldUI_block_toolbar_gridpane.add(temp, i, 0);
+
+            		Rectangle temp2 = new Rectangle();
+
+            		temp2.setX(0);
+            		temp2.setY(0);
+            		temp2.setWidth(16
+            				//Plokk.suurus
+            				);
+            		temp2.setHeight(16
+            				//Plokk.suurus
+            				);
+            		temp2.setFill(Plokk.textures[i]);
+
+
+            		temp.setGraphic(temp2);
+
+            		temp.setToggleGroup(BlockButtons);
+
+            		temp.setOnAction(
+            				new EventHandler<ActionEvent>() {
+            					@Override public void handle(ActionEvent e) {
+            						currentTool = temp.i;
+            						väli_selected_block_tool.setText( temp.i + "" );
+            					}      
+            				}
+            				);
+            		if (i==0){
+            			temp.fire();
+            		}
+
+            		//Label rl = new Label(i + "");
+            		//rl.setMouseTransparent(true);
+            		//oldUI_block_toolbar_gridpane.add(rl, i, 0);
+
+            	}
+
+            }
+            
+            // programmi toolbar
+            ruudustik.add(silt, 1, 0);
+            ruudustik.add(field_level_filename, 2, 0);
+            //ruudustik.add(väli, 3, 0);
+            ruudustik.add(nupp, 4, 0);
+            // programmi toolbar
+            
+
+            
+            oldUI_block_toolbar_gridpane.add(väli_selected_block_tool, 20, 0);
+            
+            // ^^ OLD UI
+             
+
+            Label label_block_size = new Label("Zoom: ");
+            Button button_block_size_apply = new Button("Set");
+            final NumberTextField field_zoom = new NumberTextField();
            
-            final TextField väli_pintsli_laius = new TextField();
-            final TextField väli_pintsli_kõrgus = new TextField();
-            final Button nupp_pintsli_suurus_rakenda = new Button("nupp_pintsli_suurus_rakenda");
-           
-           
-            Button button_save = new Button("Save");
-           
- 
-                 ToggleGroup tools = new ToggleGroup();
- 
-                button_tool_place = new BlockButton();
-                button_tool_fill = new BlockButton();
-                button_tool_laimis = new BlockButton();
-                button_tool_custom_brush_size = new BlockButton();
-                button_tool_place.setText("Place");
-                button_tool_fill.setText("Fill");
-                button_tool_laimis.setText("Laimis");
-                button_tool_custom_brush_size.setText(pintsli_laius + "x" + pintsli_kõrgus);
-                button_tool_place.setToggleGroup(tools);
-                button_tool_fill.setToggleGroup(tools);
-                button_tool_laimis.setToggleGroup(tools);
-                button_tool_custom_brush_size.setToggleGroup(tools);
-                button_tool_place.fire();
- 
-            Label label_block_size = new Label("Block size: ");
-            Button button_block_size_apply = new Button("Use size. You must reload level.");
-            final TextField väli_block_size = new TextField();
-           
- 
-                GridPane gridPane_infolabels = new GridPane();
-                GridPane ruudustik2 = new GridPane();
-                GridPane ruudustik3 = new GridPane();
+            GridPane gridPane_infolabels = new GridPane();
+            
+            ToggleGroup tools = new ToggleGroup();
+
+            button_tool_place = new BlockButton();
+            button_tool_fill = new BlockButton();
+            button_tool_laimis = new BlockButton();
+            button_tool_custom_brush_size = new BlockButton();
+            button_tool_place.setText("Place");
+            button_tool_fill.setText("Fill");
+            button_tool_laimis.setText("Square");
+            button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);
+            button_tool_place.setToggleGroup(tools);
+            button_tool_fill.setToggleGroup(tools);
+            button_tool_laimis.setToggleGroup(tools);
+            button_tool_custom_brush_size.setToggleGroup(tools);
+            button_tool_place.fire();
+            
+            GridPane image_resize_dialog_gridpane = new GridPane();
+
+            Label label_bgimage_x = new Label("Width: ");
+            final NumberTextField pildiLaiusVäli = new NumberTextField();
+            Label label_bgimage_y = new Label("Height: ");
+            final NumberTextField pildiKõrgusVäli = new NumberTextField();
+            Label pildifailSilt = new Label("Filename: ");
+            final TextField field_image_file = new TextField();
+            final Button button_reset_image_size = new Button("Reset size");
+            final Button button_refresh_image = new Button("Apply image");
                
-                 ToggleGroup BlockButtons = new ToggleGroup();
- 
-                // plokkide nupud
-                for (int i = 0; i<14; i++){
-                       
-                        if (i < 41 ){
-                                final BlockButton temp = new BlockButton();
-                                temp.i = i;
-                                //ruudustik2.getChildren().add(temp);
-                                //StackPane.setMargin(temp, new Insets(0, 0, 0, 0));
-       
-                                ruudustik2.add(temp, i, 0);
-                               
-                                Rectangle temp2 = new Rectangle();
-                               
-                                temp2.setX(0);
-                                temp2.setY(0);
-                                temp2.setWidth(16
-                                                //Plokk.suurus
-                                                );
-                                temp2.setHeight(16
-                                                //Plokk.suurus
-                                                );
-                                temp2.setFill(Plokk.textures[i]);
-                               
-                                temp.setGraphic(temp2);
-                               
-                                temp.setToggleGroup(BlockButtons);
-                               
-                            temp.setOnAction(
-                                        new EventHandler<ActionEvent>() {
-                                                @Override public void handle(ActionEvent e) {
-                                                        currentTool = temp.i;
-                                                        väli_selected_block_tool.setText( temp.i + "" );
-                                                }      
-                                        }
-                            );
-                        if (i==0){
-                                temp.fire();
-                        }
-                           
-//                              Label rl = new Label(i + "");
-//                              rl.setMouseTransparent(true);
-//                              ruudustik2.add(rl, i, 0);
-                   
-                        }
-                       
-                }
-           
-               
- 
-            Label label_bgimage_x = new Label("PiltX: ");
-            final TextField pildiLaiusVäli = new TextField();
-            Label label_bgimage_y = new Label("PiltY: ");
-            final TextField pildiKõrgusVäli = new TextField();
-            Label pildifailSilt = new Label("Pilt: ");
-            final TextField pildifailVäli = new TextField();
-            final Button button_recalculate_image = new Button("Arvuta_pildi_kordinaadid");
-            final Button button_refresh_image = new Button("Set");
-            final Button button_make_robot_lot = new Button("Make robot lot");
-               
-            ruudustik3.add(label_bgimage_x, 1, 0);
-            ruudustik3.add(pildiLaiusVäli, 2, 0);
-            ruudustik3.add(label_bgimage_y, 3, 0);
-            ruudustik3.add(pildiKõrgusVäli, 4, 0);
-            ruudustik3.add(pildifailSilt, 5, 0);
-            ruudustik3.add(pildifailVäli, 6, 0);
-            ruudustik3.add(button_recalculate_image, 10, 0);
-            ruudustik3.add(button_refresh_image, 11, 0);
-            ruudustik3.add(button_make_robot_lot, 12, 0);
+            image_resize_dialog_gridpane.add(label_bgimage_x, 1, 0);
+            image_resize_dialog_gridpane.add(pildiLaiusVäli, 2, 0);
+            image_resize_dialog_gridpane.add(label_bgimage_y, 3, 0);
+            image_resize_dialog_gridpane.add(pildiKõrgusVäli, 4, 0);
+            image_resize_dialog_gridpane.add(pildifailSilt, 5, 0);
+            image_resize_dialog_gridpane.add(field_image_file, 6, 0);
+            image_resize_dialog_gridpane.add(button_reset_image_size, 10, 0);
+            image_resize_dialog_gridpane.add(button_refresh_image, 11, 0);
            
             pildiLaiusVäli.setText(pildiLaius+"");
             pildiKõrgusVäli.setText(pildiKõrgus+"");
-            pildifailVäli.setText("parkla.png");
+            
+
  
-            väli_pintsli_laius.setText(pintsli_laius + "");
-            väli_pintsli_kõrgus.setText(pintsli_kõrgus + "");
- 
-                final Canvas canvas = new Canvas(1920,1080);
-                final GraphicsContext gc = canvas.getGraphicsContext2D();
+            final Canvas canvas = new Canvas(level_width*Plokk.suurus,level_height*Plokk.suurus);
+            final GraphicsContext gc = canvas.getGraphicsContext2D();
                
-            väli.setText("1");
-            väli_level_filename.setText("levels.dat");
-            väli_block_size.setText(Plokk.suurus + "");
+            field_zoom.setText(Plokk.suurus + "");
  
-            // programmi toolbar
-            ruudustik.add(silt, 1, 0);
-            ruudustik.add(väli_level_filename, 2, 0);
-            //ruudustik.add(väli, 3, 0);
-            ruudustik.add(nupp, 4, 0);
-            ruudustik.add(button_save, 6, 0);
+
+
+            GridPane modes = new GridPane();
+            modes.add(button_tool_place, 16, 0);
+            modes.add(button_tool_fill, 17, 0);
+            modes.add(button_tool_laimis, 18, 0);
+            modes.add(button_tool_custom_brush_size, 19, 0);
  
-            ruudustik.add(label_tool, 15, 0);
-            ruudustik2.add(väli_selected_block_tool, 20, 0);
- 
-            ruudustik.add(label_block_size, 12, 0);
-            ruudustik.add(väli_block_size, 13, 0);
-            ruudustik.add(button_block_size_apply, 14, 0);
-           
-            ruudustik.add(button_tool_place, 16, 0);
-            ruudustik.add(button_tool_fill, 17, 0);
-            ruudustik.add(button_tool_laimis, 18, 0);
-            ruudustik.add(button_tool_custom_brush_size, 19, 0);
- 
-            ruudustik.add(väli_pintsli_laius, 20, 0);
-            ruudustik.add(väli_pintsli_kõrgus, 21, 0);
-            ruudustik.add(nupp_pintsli_suurus_rakenda, 22, 0);
-           
-                root.add(ruudustik, 0, 0);
-                root.add(gridPane_infolabels, 0, 1);
-                root.add(ruudustik2, 0, 2);
-                root.add(ruudustik3, 0, 3);
-                root.add(canvas, 0, 4);
-                //root.add(canvas2, 1, 3);
-                root.add(level, 0, 4);
-                //root.add(level2, 1, 4);
-                ruudustik2.add(silt4, 21, 0);
-               
-               
-                gridPane_infolabels.add(silt5, 0, 1);
-                gridPane_infolabels.add(parkimiskohadSilt, 0, 2);
- 
-               
- 
-           
-            nupp.setOnAction(
-                new EventHandler<ActionEvent>() {
-               
+
+            
+            // new UI
+
+            GridPane newUI = new GridPane();
+            
+            final Button button_newUI_choose_image = new Button("Choose image");
+
+            
+            final Button button_newUI_choose_dat = new Button("Choose .dat file");
+            newUI.add(button_newUI_choose_dat,0,1);
+            button_newUI_choose_dat.setOnAction(
+                    new EventHandler<ActionEvent>() {
                         @Override public void handle(ActionEvent e) {
-                               
-                                level.getChildren().removeAll(level.getChildren());
-                                level2.getChildren().removeAll(level2.getChildren());
-                                parkimiskohad1 = 0;
-                                parkimiskohad2 = 0;
-                               
-                                // read saved file into queue l2
-                            try {
-                                        loeLevel( Integer.parseInt(väli.getText() ), väli_level_filename.getText()  );
-                                        //button_refresh_image.fire();
-                                }
-                            // file not found likely, fill queue with generic level instead
-                            catch (Exception erind) {
- 
-                                //System.out.println("faili pole, teen uue");
- 
-                                        silt5.setText(erind+ " - " + df.format(System.currentTimeMillis() )  );
-                                       
-                                        for(int i = 1; i<=leveli_kõrgus; i++){
-                                                for(int j = 1; j<=leveli_laius; j++){
-                                                        if (i == 1 || i==leveli_kõrgus || j==1 || j==leveli_laius){
-                                                                l2.add(6);
-                                                        }
-                                                        else{
-                                                                l2.add(2);
-                                                        }
-                                               
-                                                }
-                                                //System.out.println();
-                                               
-                                        }
- 
-                                //System.out.println(erind);
-                            }
-                            // draw level from queue
-                            finally {
-                                        for(int i = 0; i<leveli_kõrgus; i++){
-                                                for(int j = 0; j<leveli_laius; j++){
-                                                        lisaplokk(   l2.pop(), j, i, level  );         
-                                                }
-                                        }
-                            }
-                        }
+                            stage3.show();
+                            stage3.setWidth(248);
+                        }      
                 }
             );
+            final Button button_newUI_resize_image = new Button("Resize image");
+
+            newUI.add(button_newUI_resize_image,0,2);
+            
+            GridPane newUI_zoom_gridPane = new GridPane();
+            newUI.add(newUI_zoom_gridPane,0,3);
+            
+            newUI_zoom_gridPane.add(label_block_size, 0,0);
+            newUI_zoom_gridPane.add(field_zoom, 1,0);
+            field_zoom.setMaxWidth(40);
+            field_zoom.setMinWidth(40);
+            newUI_zoom_gridPane.add(button_block_size_apply, 2,0);
+            
+            GridPane newUI_toolbuttons = new GridPane();
+            newUI.add(newUI_toolbuttons,1,0);
+            
+            final BlockButton button_newUI_draw_wall = new BlockButton();
+            final BlockButton button_newUI_draw_parking = new BlockButton();
+            final BlockButton button_newUI_gate = new BlockButton();
+            final BlockButton button_newUI_clear = new BlockButton();
+            ToggleGroup toolsNew = new ToggleGroup();
+            button_newUI_draw_wall.setToggleGroup(toolsNew);
+            button_newUI_draw_parking.setToggleGroup(toolsNew);
+            button_newUI_gate.setToggleGroup(toolsNew);
+            button_newUI_clear.setToggleGroup(toolsNew);
+            
+            button_newUI_draw_wall.setGraphic(new Rectangle(16,16,Plokk.textures[5]));
+            button_newUI_draw_parking.setGraphic(new Rectangle(16,16,Plokk.textures[1]));
+            button_newUI_gate.setGraphic(new Rectangle(16,16,Plokk.textures[4]));
+            button_newUI_clear.setGraphic(new Rectangle(16,16,Plokk.textures[2]));
+
+            newUI_toolbuttons.add(button_newUI_draw_wall,1,0);
+            newUI_toolbuttons.add(button_newUI_draw_parking,2,0);
+            newUI_toolbuttons.add(button_newUI_gate,3,0);
+            newUI_toolbuttons.add(button_newUI_clear,4,0);
+            
+            
+            button_newUI_draw_wall.setOnAction(
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				if (!button_tool_place.isSelected()){
+                				button_tool_place.fire();
+            					
+            				}
+            				currentTool = 5;
+            				väli_selected_block_tool.setText(5+ "" );
+            			}      
+            		}
+            		);
+            button_newUI_draw_parking.setOnAction(
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				if (!button_tool_custom_brush_size.isSelected()){
+                				button_tool_custom_brush_size.fire();
+            					
+            				}
+            				currentTool = 1;
+            				väli_selected_block_tool.setText(1+ "" );
+            			}      
+            		}
+            		); 
+
+            button_newUI_gate.setOnAction(
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				if (!button_tool_place.isSelected()){
+                				button_tool_place.fire();
+            					
+            				}
+            				currentTool = 4;
+            				väli_selected_block_tool.setText(4+ "" );
+            			}      
+            		}
+            		);
+            
+            button_newUI_clear.setOnAction(
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				if (!button_tool_place.isSelected()){
+                				button_tool_place.fire();
+            					
+            				}
+            				currentTool = 2;
+            				väli_selected_block_tool.setText(2+ "" );
+            			}      
+            		}
+            		);   
+            
+            
+            final Button button_newUI_resize_p = new Button("Resize P");
+            newUI.add(button_newUI_resize_p,1,1);
+            
+            final Button button_newUI_save_dat = new Button("Save dat");
+            
+            final Button button_newUI_run = new Button("Make robot lot");
+            
+            //final Label label_newUI_image = new Label("Chosen image");
+            //final Label label_newUI_dat = new Label("Chosen dat");
+
+            
+            
+            
+            // vv dialog
+            final Stage newUI_resize_image_dialog_stage = new Stage();
+            Scene newUI_resize_image_dialog_scene = new Scene(image_resize_dialog_gridpane);
+            newUI_resize_image_dialog_stage.setTitle("Resize Image");
+            newUI_resize_image_dialog_stage.setScene(newUI_resize_image_dialog_scene);
+            
+            //^^ dialog 
+            
+            newUI.add(button_newUI_choose_image,0,0);            
+            button_newUI_choose_image.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                        @Override public void handle(ActionEvent e) {
+                        	newUI_resize_image_dialog_stage.show();
+                        }      
+                }
+            );
+            
+
+            
+            button_newUI_resize_image.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                        @Override public void handle(ActionEvent e) {
+                        	newUI_resize_image_dialog_stage.show();
+                        }      
+                }
+            );
+            
+
+            
+            
+            // vv dialog
+            final Stage newUI_resize_p_dialog_stage = new Stage();
+            
+            GridPane newUI_resize_p_dialog_gridpane = new GridPane();
+            Scene newUI_resize_p_dialog = new Scene(newUI_resize_p_dialog_gridpane);
+            newUI_resize_p_dialog_stage.setTitle("Resize P");
+            newUI_resize_p_dialog_stage.setScene(newUI_resize_p_dialog);
+            
+            //^^ dialog
+           
+            
+            
+            final TextField väli_pencil_width = new TextField();
+            final TextField väli_pencil_height = new TextField();
+            final Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
+            
+            väli_pencil_width.setText(pencil_width + "");
+            väli_pencil_height.setText(pencil_height + "");
+            
+            newUI_resize_p_dialog_gridpane.add(väli_pencil_width, 1, 0);
+            newUI_resize_p_dialog_gridpane.add(väli_pencil_height, 2, 0);
+            newUI_resize_p_dialog_gridpane.add(nupp_pintsli_suurus_rakenda, 3, 0);
+            
+            //newUI_resize_p_dialog_stage.show();
+            button_newUI_resize_p.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                        @Override public void handle(ActionEvent e) {
+                        	newUI_resize_p_dialog_stage.show();
+                        }      
+                }
+            );
+            
+            //newUI.add(label_newUI_image,1,2);
+            newUI.add(modes,1,2);
+            
+            //newUI.add(label_newUI_dat,1,3);
+            
+            newUI.add(button_newUI_save_dat,2,0);
+            newUI.add(button_newUI_run,2,1);
+            newUI.add(label_newUI_parkingSlots,2,2);
+            newUI.add(label_newUI_robotSlots,2,3);
+            
+            ColumnConstraints column1 = new ColumnConstraints();
+            column1.setPercentWidth(33);
+            newUI.getColumnConstraints().add(column1);
+            newUI.getColumnConstraints().add(column1);
+            newUI.getColumnConstraints().add(column1);
+            
+            
+ 
+            // old UI window
+            GridPane oldRoot = new GridPane();
+            oldRoot.add(ruudustik, 0, 0);
+            oldRoot.add(oldUI_block_toolbar_gridpane, 0, 1);
+            
+            // vv
+
+            Scene scene3 = new Scene(oldRoot, 226, 26);
+            stage3.setTitle("Choose file");
+            stage3.setScene(scene3);
+            //^^
+            
+            // vv
+            
+            root.add(newUI, 0, 3);
+
+            root.add(gridPane_infolabels, 0, 5);
+                
+            GridPane scrollableContent = new GridPane();
+            scrollableContent.add(canvas, 0, 0);
+            scrollableContent.add(level, 0, 0);
+            //root.add(canvas, 0, 4);
+            //root.add(canvas2, 1, 3);
+
+            final ScrollPane scrollable = new ScrollPane();
+            scrollable.setHbarPolicy(ScrollBarPolicy.ALWAYS);
+            scrollable.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+            //scrollable.setContent(level);
+            scrollable.setContent(scrollableContent);
+            //root.add(level, 0, 4);
+            root.add(scrollable, 0, 4);
+            //root.add(level2, 1, 4);
+            //oldUI_block_toolbar_gridpane.add(label_mouse_cordinates, 21, 0);
+
+
+            gridPane_infolabels.add(label_mouse_cordinates, 0, 0);
+            gridPane_infolabels.add(silt5, 1, 0);
+            gridPane_infolabels.getColumnConstraints().add(column1);
+            gridPane_infolabels.getColumnConstraints().add(column1);
+            //gridPane_infolabels.add(number_of_parking_slots_Silt, 0, 2);
+ 
+               
+
+                
+            // open button
+            nupp.setOnAction(
+            		new EventHandler<ActionEvent>() {
+
+            			@Override public void handle(ActionEvent e) {
+
+            				level.getChildren().removeAll(level.getChildren());
+            				level2.getChildren().removeAll(level2.getChildren());
+            				number_of_parking_slots_1 = 0;
+            				number_of_parking_slots_2 = 0;
+
+            				// read saved file into queue l2
+            				try {
+            					loadLevel( 1, field_level_filename.getText()  );
+            					//button_refresh_image.fire();
+            				}
+            				// file not found likely, fill queue with generic level instead
+            				catch (Exception erind) {
+
+            					//System.out.println("faili pole, teen uue");
+
+            					if (erind instanceof FileNotFoundException){
+
+            						if (field_level_filename.getText().equals("")){
+            							silt5.setText("No file. - " + df.format(System.currentTimeMillis() )  );
+            							makeGenericLevel();
+            						}
+            						else{
+            							silt5.setText("File not found. So we crated it. - " + df.format(System.currentTimeMillis() )  );
+            							makeGenericLevel();
+            						}
+            						//System.out.println(erind);
+            					}
+            					else if (erind instanceof WrongFileException){
+            						silt5.setText("Not correctly structured file - " + df.format(System.currentTimeMillis() )  );
+            						makeGenericLevel();
+            						field_level_filename.setText("");
+            					}
+            					else{
+            						silt5.setText("While opening file: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
+            						makeGenericLevel();
+            					}
+            					
+            				}
+            				// draw level from queue
+            				finally {
+            					for(int i = 0; i<level_height; i++){
+            						for(int j = 0; j<level_width; j++){
+            							add_block(   l2.pop(), j, i, level  );         
+            						}
+            					}
+
+                                stage3.hide();
+            				}
+            			}
+            		}
+            		);
            
            
  
            
             button_block_size_apply.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                                @Override public void handle(ActionEvent e) {
-                                        int uusSuurus =  Integer.parseInt( väli_block_size.getText() );
-                                        vanaSuurus = Plokk.suurus;
-                                        Plokk.suurus = uusSuurus;
-                                        if (uusSuurus > vanaSuurus){
-                                        canvas.setHeight(uusSuurus*leveli_kõrgus);
-                                        }
-                                    }      
-                        }
-            );
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				int uusSuurus =  Integer.parseInt( field_zoom.getText() );
+            				vanaSuurus = Plokk.suurus;
+            				Plokk.suurus = uusSuurus;
+            				canvas.setHeight(uusSuurus*level_height);
+            				canvas.setWidth(uusSuurus*level_width);
+
+            				int x =  Integer.parseInt( pildiLaiusVäli.getText() );
+            				int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
+            				pildiLaiusVäli.setText(((x/vanaSuurus)*Plokk.suurus)+"");
+            				pildiKõrgusVäli.setText(((y/vanaSuurus)*Plokk.suurus)+"");
+
+            				button_refresh_image.fire();
+            				reset();
+
+            			}
+            		}
+            		);
+
+            button_reset_image_size.setOnAction(
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				pildiLaiusVäli.setText(level_width*Plokk.suurus+"");
+            				pildiKõrgusVäli.setText(level_height*Plokk.suurus+"");
+            				
+            			}      
+            		}
+            		);
            
-            button_recalculate_image.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                                @Override public void handle(ActionEvent e) {
-                                        int x =  Integer.parseInt( pildiLaiusVäli.getText() );
-                                        int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
-                                        pildiLaiusVäli.setText(((x/vanaSuurus)*Plokk.suurus)+"");
-                                        pildiKõrgusVäli.setText(((y/vanaSuurus)*Plokk.suurus)+"");
-                                }      
-                        }
-            );
-           
-           
-            button_save.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                       
-                                @Override public void handle(ActionEvent e) {
-                                                                try{           
-                                                                       
-                                                                        //System.out.println( Integer.parseInt(väli.getText() ));
-                                                                        //System.out.println(väli_level_filename.getText());
-                                                                       
-                                                                       
-                                                salveLevel( Integer.parseInt(väli.getText() ), väli_level_filename.getText()  );
-                                                                }
-                                                                catch(Exception erind){
-                                                                silt5.setText("salvestamine, tekkis: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
-                                                                }
-                 
-                                }
-                        }
-       
-                    );
- 
+
+            button_newUI_save_dat.setOnAction(
+            		new EventHandler<ActionEvent>() {
+
+            			@Override public void handle(ActionEvent e) {
+            				try{           
+
+            					saveLevel( 1, field_level_filename.getText()  );
+
+            				}
+            				catch(Exception erind){
+            					silt5.setText("salvestamine, tekkis: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
+                                stage3.show();
+                                stage3.setWidth(200);
+            				}
+
+            			}
+            		}
+
+            		);
+
            
             button_refresh_image.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                       
-                                @Override public void handle(ActionEvent e) {                                                          
+            		new EventHandler<ActionEvent>() {
+
+            			@Override public void handle(ActionEvent e) {                                                          
+
+            				try{           
+            					pildiLaius = Integer.parseInt(pildiLaiusVäli.getText());
+            					pildiKõrgus = Integer.parseInt(pildiKõrgusVäli.getText());
+            					gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
+            					gc.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
+            					//gc2.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
+            					//gc2.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
+            				}
+            				catch(Exception f){
+            					silt5.setText("While opening image: "+f+ " - " + df.format(System.currentTimeMillis() )  );
+            					System.out.println(f);
+            				}
+            				finally{
+            					newUI_resize_image_dialog_stage.hide();
+            				}
+
+
+
+            			}
+            		}
+
+            		);
  
-                                        try{           
-                                                pildiLaius = Integer.parseInt(pildiLaiusVäli.getText());
-                                                pildiKõrgus = Integer.parseInt(pildiKõrgusVäli.getText());
-                                            gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(pildifailVäli.getText())))));
-                                            gc.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
-                                            //gc2.setFill(new ImagePattern(new Image(new FileInputStream(new File(pildifailVäli.getText())))));
-                                            //gc2.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
-                                }
-                                catch(Exception f){
-                                        System.out.println(f);
-                                }
-                                       
-                                   
-                 
-                                }
-                        }
-       
-                    );
- 
-           
-            button_make_robot_lot.setOnAction(
+           // Run algorithm
+            button_newUI_run.setOnAction(
                         new EventHandler<ActionEvent>() {
-                       
                                 @Override public void handle(ActionEvent e) {
-                                       
                                         level2.getChildren().removeAll(level2.getChildren());
-                                       
-                                        parkimiskohad2 = 0;
-                                       
+                                        number_of_parking_slots_2 = 0;
                                        
                                     try {
-                                        int gateX = (int) Double.POSITIVE_INFINITY;
-                                                int gateY = (int) Double.POSITIVE_INFINITY;
-                                                pl = pintsli_laius;
-                                                pk = pintsli_kõrgus;
-                                       
-                                        for(int i = 0; i<leveli_laius; i++){
-                                                        for(int j = 0; j<leveli_kõrgus; j++){
-                                                               
-                                                               
-                                                                int uusP = ((Plokk) getNodeFromGridPane(level, i, j)).nr; // milline on vana plokk kohas i, j
-                                                                //multiple entries - per 9 piece batches
-                                                               
-                                                                if(uusP == 4){
-                                                                        if(gateX > i){
-                                                                                gateX = i;
-                                                                        }
-                                                                        if(gateY > j){
-                                                                                gateY = j;
-                                                                        }
-                                                                }
-                                                                lisaplokk( uusP  , i, j, level2  );      // lisab uude levelisse samasse kohta samasuguse ploki
-                                                               
-                                                        }
-                                                }
-                                       
-                                       
-                                        //the initial counters RNG (maybe further ones aswell)
-                                        if(getType(gateX-1, gateY) == 2){
-                                                go(-pl, 0, gateX, gateY, 6);
-                                        }
-                                        else if(getType(gateX, gateY-1) == 2){
-                                                go(0, -pk, gateX, gateY, 6);
-                                        }
-                                        else if(getType(gateX+pl, gateY+pk+1) == 2){
-                                                go(0, pk, gateX, gateY, 6);
-                                        }
-                                        else if(getType(gateX+pl+1, gateY+pk) == 2){
-                                                go(pl, 0, gateX, gateY, 6);
-                                        }
-                                       
-                                       
-                                       
-                                        ///////////////////////////////////////////////////////
-                                        // siia kirjutada algoritm, mis teeb vanast uue!! Praegu loeb vana lihtsalt uueks.
-                                        ///////////////////////////////////////////////////////
-                                        ///////////////////////////////////////////////////////
-                                        // Laimis, kirjuta siia kuskile asju juurde. See juhtub, kui käivitada algoritm
-                                        ///////////////////////////////////////////////////////
- 
-                                               
-                                               
+                                    		// this is where laimis's code used to be that is now in class Algorithm
+                                            Algorithm.run();   
                                         }
                                     catch (Exception erind) {
-                                        System.out.println(erind + " - laimis is a pleb and cant code for s**t");
+                                        System.out.println(erind + " - algorithm error");
                                     }
                                     stage2.show();
                                 }
@@ -969,146 +1146,173 @@ public class Main extends Application {
                        
                                 @Override public void handle(ActionEvent e) {
  
-                                        pintsli_laius = Integer.parseInt(väli_pintsli_laius.getText());
-                                        pintsli_kõrgus = Integer.parseInt(väli_pintsli_kõrgus.getText());
-                                        button_tool_custom_brush_size.setText(pintsli_laius + "x" + pintsli_kõrgus);    
+                                        pencil_width = Integer.parseInt(väli_pencil_width.getText());
+                                        pencil_height = Integer.parseInt(väli_pencil_height.getText());
+                                        button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);    
+                                        //button_newUI_resize_p.setText("Resize P" + "(" + pencil_width + "x" + pencil_height + ")"); 
+                        				newUI_resize_p_dialog_stage.hide();
                                 }
                         }
                     );
            
-            level.addEventHandler(MouseEvent.MOUSE_DRAGGED, new Käsitleja2(level));
-           
-            Scene scene2 = new Scene(level2,1920,900);
-                stage2.setTitle("Simulatsioon");
+           // second window
+            final ScrollPane scrollable2 = new ScrollPane();
+            scrollable2.setHbarPolicy(ScrollBarPolicy.ALWAYS);
+            scrollable2.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+            scrollable2.setContent(level2);
+            
+            
+            final GridPane simUI_main = new GridPane();
+            GridPane simUI = new GridPane();
+            Label simUI_field_explaination_entering = new Label("Entering cars (per hour): ");
+            simUI.add(simUI_field_explaination_entering, 0, 0);
+            final NumberTextField simUI_field_entering = new NumberTextField();
+            simUI.add(simUI_field_entering, 0, 1);
+
+            Label simUI_field_explaination_exiting = new Label("Exiting cars (per hour)");
+            simUI.add(simUI_field_explaination_exiting, 1, 0);
+            final NumberTextField simUI_field_exiting = new NumberTextField();
+            simUI.add(simUI_field_exiting, 1, 1);
+            
+            Label simUI_field_explaination_robo_speed = new Label("Robot's speed (m/s)");
+            simUI.add(simUI_field_explaination_robo_speed, 2, 0);
+            final NumberTextField simUI_field_robo_speed = new NumberTextField();
+            simUI.add(simUI_field_robo_speed, 2, 1);
+
+            Label simUI_field_explaination_robo_nr = new Label("No. of robots");
+            simUI.add(simUI_field_explaination_robo_nr, 3, 0);
+            final NumberTextField simUI_field_robo_nr = new NumberTextField();
+            simUI.add(simUI_field_robo_nr, 3, 1);
+            
+            final Button button_simUI_apply = new Button("Apply changes");
+            simUI.add(button_simUI_apply, 4, 1);
+            button_simUI_apply.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                   
+                            @Override public void handle(ActionEvent e) {
+                            	Simulation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
+                            	Simulation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
+                            	Simulation.botSpeed = Integer.parseInt(simUI_field_robo_speed.getText());
+                            	Simulation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
+                            }
+                    }
+                );
+            ;
+            final Button button_simUI_run = new Button("Run");
+            simUI.add(button_simUI_run, 5, 1);
+            button_simUI_run.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                   
+                            @Override public void handle(ActionEvent e) {
+                            	if(button_simUI_run.getText().equals("Run")){
+                            		button_simUI_run.setText("Pause");
+                                	Simulation.run();
+                            	}
+                            	else{
+                            		button_simUI_run.setText("Run");
+                            		Simulation.pause();
+                            	}
+                            }
+                    }
+                );
+            ;
+            simUI_main.add(simUI, 0, 0);
+            simUI_main.add(scrollable2, 0, 1);
+            
+            
+            
+            final Scene scene2 = new Scene(simUI_main,1600,900);
+            stage2.setTitle("Robot simulation");
             stage2.setScene(scene2);
            
-            nupp.fire();
+            scrollable.setMaxWidth(scene.getWidth());
+            scrollable.setMinWidth(scene.getWidth());
+            scrollable.setMaxHeight(scene.getHeight()-120);
+            scrollable.setMinHeight(scene.getHeight()-120);
+            
+            scrollable2.setMaxWidth(scene.getWidth());
+            scrollable2.setMinWidth(scene.getWidth());
+            scrollable2.setMaxHeight(scene.getHeight()-40);
+            scrollable2.setMinHeight(scene.getHeight()-40);
+            
+            
+
+
+
+            
+            scene.widthProperty().addListener(new ChangeListener<Number>() {
+
+                @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+
+                    //System.out.println("Width: " + newSceneWidth);
+                    scrollable.setMaxWidth(scene.getWidth());
+                    scrollable.setMinWidth(scene.getWidth());
+                    //canvas.setWidth(scene.getWidth());
+                }
+
+            });
+
+            scene.heightProperty().addListener(new ChangeListener<Number>() {
+
+                @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+
+                    //System.out.println("Height: " + newSceneHeight);
+                    scrollable.setMaxHeight(scene.getHeight()-120);
+                    scrollable.setMinHeight(scene.getHeight()-120);
+                    //canvas.setHeight(scene.getHeight()-120);
+
+                }
+
+            });
+            
+            scene2.widthProperty().addListener(new ChangeListener<Number>() {
+
+                @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+
+                    //System.out.println("Width: " + newSceneWidth);
+                    scrollable2.setMaxWidth(scene2.getWidth());
+                    scrollable2.setMinWidth(scene2.getWidth());
+                    //canvas.setWidth(scene.getWidth());
+                }
+
+            });
+
+            scene2.heightProperty().addListener(new ChangeListener<Number>() {
+
+                @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+
+                    //System.out.println("Height: " + newSceneHeight);
+                    scrollable2.setMaxHeight(scene2.getHeight()-40);
+                    scrollable2.setMinHeight(scene2.getHeight()-40);
+                    //canvas.setHeight(scene.getHeight()-120);
+
+                }
+
+            });
+
+
+            
+            level.addEventHandler(MouseEvent.MOUSE_DRAGGED, new MouseEvent_Drag_Handler(level));
+            updateParkingLabels();
+
+            button_newUI_draw_wall.fire();
+            
+            //field_level_filename.setText("levels.dat");
+            //field_image_file.setText("parkla.png");
+            
             button_refresh_image.fire();
-            Scene scene = new Scene(root,1920,900);
-               
-            primaryStage.setScene(scene);
-                primaryStage.show();
+            
+            nupp.fire();
+
+            simUI_field_entering.setText(Simulation.numberOfCarsIn+"");
+            simUI_field_exiting.setText(Simulation.numberOfCarsOut+"");
+            simUI_field_robo_speed.setText(Simulation.botSpeed+"");
+            simUI_field_robo_nr.setText(Simulation.numberOfbots+"");
+            //button_refresh_image.fire();
+            // show main window
+            primaryStage.show();
         }
        
-       
-       
-        //LAIMIS START
-       
-        public int getType(int x, int y){
-                return ((Plokk) getNodeFromGridPane(level2, x, y)).nr;
-    }
-       
-        public boolean containsAll(int x, int y, int type){
-                for(int i = 0; i<pl; i++){
-                        for(int j = 0; j<pk; j++){
-                                if(getType(x+i, y+j) != type){
-                                        return false;
-                                }
-                        }
-                }
-                return true;
-    }
-       
-        public void go(int x, int y, int gateX, int gateY, int counter){
-                if(containsAll(gateX+x*2, gateY+y*2, 2) == true && containsAll(gateX+x*3, gateY+y*3, 2) == true
-                                && containsAll(gateX+x*4, gateY+y*4, 2) == true){
-                        addRoad(gateX+x, gateY+y);
-                        go(x, y, gateX+x, gateY+y, counter+1); 
-                        if(counter%7 == 0){
-                                if(y == 0){
-                                        go(0, pk, gateX+x, gateY+y, 1);
-                                        go(0, -pk, gateX+x, gateY+y, 1);
-                                }
-                                else{
-                                        go(pl, 0, gateX+x, gateY+y, 1);
-                                        go(-pl, 0, gateX+x, gateY+y, 1);
-                                }                              
-                        }
-                        else{
-                                int t1 = 0; int t2 = 1;
-                                if(y == 0){
-                                        t1 = 1; t2 = 0;
-                                }
-                                for(int i = -1; i < 2; i = i+2){
-                                        if(containsAll(gateX+x+(pl*i)*t2, gateY+y+(pk*i)*t1, 2) == true){
-                                                addParking(gateX+x+(pl*i)*t2, gateY+y+(pk*i)*t1, level2);
-                                                if(containsAll(gateX+x+(pl*2*i)*t2, gateY+y+(pk*2*i)*t1, 2) == true){
-                                                        addParking(gateX+x+(pl*2*i)*t2, gateY+y+(pk*2*i)*t1, level2);
-                                                        if(containsAll(gateX+x+(pl*3*i)*t2, gateY+y+(pk*3*i)*t1, 2) == true){
-                                                                addParking(gateX+x+(pl*3*i)*t2, gateY+y+(pk*3*i)*t1, level2);
-                                                        }
-                                                }
-                                        }      
-                                }                      
-                        }
-                }
-                //PARKING SPOTS WHEN REACHING THE WALL
-                else{
-                        int t1 = 0; int t2 = 1;
-                        if(y == 0){
-                                t1 = 1; t2 = 0;
-                        }
-                        for(int i = -3; i < 4; i++){
-                                if(containsAll(gateX+(x)+(pl*i)*t2, gateY+(y)+(pk*i)*t1, 2) == true){
-                                        addParking(gateX+(x)+(pl*i)*t2, gateY+(y)+(pk*i)*t1, level2);
-                                        if(containsAll(gateX+(x*2)+(pl*i)*t2, gateY+(y*2)+(pk*i)*t1, 2) == true){
-                                                addParking(gateX+(x*2)+(pl*i)*t2, gateY+(y*2)+(pk*i)*t1, level2);
-                                                if(containsAll(gateX+(x*3)+(pl*i)*t2, gateY+(y*3)+(pk*i)*t1, 2) == true){
-                                                        addParking(gateX+(x*3)+(pl*i)*t2, gateY+(y*3)+(pk*i)*t1, level2);
-                                                }
-                                        }
-                                }
-                        }
-                }
-    }
-       
-        //LAIMIS END
- 
-        public void addParking(int x, int y, GridPane lvl){
-        boolean pTäht = false;
-            for(int i = 0; i< pintsli_laius; i++){
-                    for(int j = 0; j< pintsli_kõrgus; j++){
-                           
-                                    if (i==0&&j==0){
-                                            asendaplokk(7, x+i, y+j, lvl);
-                                    }
-                                    else if (i==0&&j==pintsli_kõrgus-1){
-                                            asendaplokk(10, x+i, y+j, lvl);
-                                    }
-                                    else if (i==pintsli_laius-1&&j==0){
-                                            asendaplokk(8, x+i, y+j, lvl);
-                                    }
-                                    else if (i==pintsli_laius-1&&j==pintsli_kõrgus-1){
-                                            asendaplokk(9, x+i, y+j, lvl);
-                                    }
-                                   
-                                    else if (i==0|| i==pintsli_laius-1){
-                                            asendaplokk(11, x+i, y+j, lvl);
-                                    }
-                                    else if(j==0||j==pintsli_kõrgus-1){
-                                            asendaplokk(12, x+i, y+j, lvl);
-                                    }
-                                    else if (!pTäht){
-                                            pTäht=true;
-                                            asendaplokk(1, x+i, y+j, lvl);
-                                    }
-                                    else{
-                                            asendaplokk(13, x+i, y+j, lvl);
-                                    }
-                                   
-                    }
-            }
-        }
-   
-        public void addRoad(int x, int y){
-                for(int i = 0; i<pl; i++){
-                        for(int j = 0; j<pk; j++){
-                                asendaplokk(3, x+i, y+j, level2);
-                        }
-                }
-        }
-       
-   
         public static void main(String[] args) {
                
                 launch(args);

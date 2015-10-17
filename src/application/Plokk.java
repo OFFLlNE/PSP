@@ -6,9 +6,21 @@ import javafx.scene.shape.Rectangle;
 
 public class Plokk extends Rectangle {
 	
-
-
-
+	// constants
+	public static final int _SOLID_BLACK = 0;
+	public static final int _PARKING_P = 1;
+	public static final int _NO_BLOCK = 2;
+	public static final int _ROBOT_ROAD = 3;
+	public static final int _ROBOT_GATEWAY = 4;
+	public static final int _CONCRETE = 5;
+	public static final int _LEVEL_WALL = 6;
+	public static final int _PARKING_TOP_LEFT = 7;
+	public static final int _PARKING_TOP_RIGHT = 8;
+	public static final int _PARKING_BOT_RIGHT = 9;
+	public static final int _PARKING_BOT_LEFT = 10;
+	public static final int _PARKING_BORDER_SIDE = 11;
+	public static final int _PARKING_BORDER_TOPBOT = 12;
+	public static final int _PARKING_FILLED_BLUE = 13;
 
 	public static Paint[] textures = new Paint[50];
 	
@@ -38,7 +50,6 @@ public class Plokk extends Rectangle {
 
 		
 	}
-	
 	
 	
 	public void muuda(int pos){
