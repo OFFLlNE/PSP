@@ -9,12 +9,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -96,7 +98,7 @@ public class Main extends Application {
 	BlockButton button_tool_custom_brush_size;
 
 	static ArrayList<String> files = new ArrayList<String>();
-
+	static Simulation sim = new Simulation();
 
 	class MouseEvent_Handler implements EventHandler<MouseEvent> {
 		Plokk a;
@@ -1123,7 +1125,23 @@ public class Main extends Application {
                                         level2.getChildren().removeAll(level2.getChildren());
                                         number_of_parking_slots_2 = 0;
                                        
-                                    try {
+                                    try {		for(int i = 0; i<Main.level_width; i++){
+                            			for(int j = 0; j<Main.level_height; j++){
+
+
+                            				int uusP = ((Plokk) Main.getNodeFromGridPane(Main.level, i, j)).nr; // milline on vana plokk kohas i, j
+                            				//multiple entries - per 9 piece batches
+
+                            				
+                            				// priit lisas; ignoreerib vanu parkimiskohti
+                            				if (uusP == 1 | uusP ==  7 | uusP ==  8 | uusP ==  9 | uusP ==  10 | uusP ==  11 | uusP ==  12 | uusP ==  13){
+                            					uusP = 2;
+                            				}
+                            				
+                            				Main.add_block2( uusP  , i, j  );      // lisab uude Main.levelisse samasse kohta samasuguse ploki
+
+                            			}
+                            		}
                                     		// this is where laimis's code used to be that is now in class Algorithm
                                             Algorithm.run();   
                                         }
@@ -1205,11 +1223,14 @@ public class Main extends Application {
                    
                             @Override public void handle(ActionEvent e) {
                             	if(button_simUI_run.getText().equals("Run")){
-                            		button_simUI_run.setText("Pause");
-                                	Simulation.run();
+
+                            		Simulation.stopped = false;
+                            		button_simUI_run.setText("Play/Pause");
+                                	//Simulation.run();
+                            		(new Thread(sim)).start();
                             	}
                             	else{
-                            		button_simUI_run.setText("Run");
+                            		//button_simUI_run.setText("Run");
                             		Simulation.pause();
                             	}
                             }
@@ -1219,7 +1240,13 @@ public class Main extends Application {
             simUI_main.add(simUI, 0, 0);
             simUI_main.add(scrollable2, 0, 1);
             
-            
+            stage2.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                public void handle(WindowEvent we) {
+                    System.out.println("Stage2 is closing");
+                    Simulation.kill();
+            		button_simUI_run.setText("Run");
+                }
+            }); 
             
             final Scene scene2 = new Scene(simUI_main,1600,900);
             stage2.setTitle("Robot simulation");
