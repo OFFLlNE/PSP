@@ -124,7 +124,7 @@ public class Main extends Application {
 	BlockButton button_tool_custom_brush_size;
 
 	static ArrayList<String> files = new ArrayList<String>();
-	static Simulation sim = new Simulation();
+	static Animation sim = new Animation();
 
 	class MouseEvent_Handler implements EventHandler<MouseEvent> {
 		Plokk a;
@@ -1269,10 +1269,10 @@ public class Main extends Application {
                     new EventHandler<ActionEvent>() {
                    
                             @Override public void handle(ActionEvent e) {
-                            	Simulation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
-                            	Simulation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
-                            	Simulation.botSpeed = Integer.parseInt(simUI_field_robo_speed.getText());
-                            	Simulation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
+                            	Animation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
+                            	Animation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
+                            	Animation.botSpeed = Integer.parseInt(simUI_field_robo_speed.getText());
+                            	Animation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
                             }
                     }
                 );
@@ -1285,7 +1285,7 @@ public class Main extends Application {
                             @Override public void handle(ActionEvent e) {
                             	if(button_simUI_run.getText().equals("Run")){
 
-                            		Simulation.stopped = false;
+                            		Animation.stopped = false;
                             		button_simUI_run.setText("Play/Pause");
                                 	//Simulation.run();
                             		
@@ -1296,7 +1296,7 @@ public class Main extends Application {
                             	}
                             	else{
                             		//button_simUI_run.setText("Run");
-                            		Simulation.pause();
+                            		Animation.pause();
                             	}
                             }
                     }
@@ -1308,7 +1308,7 @@ public class Main extends Application {
             stage2.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
                     System.out.println("Stage2 is closing");
-                    Simulation.kill();
+                    Animation.kill();
             		button_simUI_run.setText("Run");
                 }
             }); 
@@ -1396,10 +1396,10 @@ public class Main extends Application {
             
             nupp.fire();
 
-            simUI_field_entering.setText(Simulation.numberOfCarsIn+"");
-            simUI_field_exiting.setText(Simulation.numberOfCarsOut+"");
-            simUI_field_robo_speed.setText(Simulation.botSpeed+"");
-            simUI_field_robo_nr.setText(Simulation.numberOfbots+"");
+            simUI_field_entering.setText(Animation.numberOfCarsIn+"");
+            simUI_field_exiting.setText(Animation.numberOfCarsOut+"");
+            simUI_field_robo_speed.setText(Animation.botSpeed+"");
+            simUI_field_robo_nr.setText(Animation.numberOfbots+"");
             //button_refresh_image.fire();
             // show main window
             primaryStage.show();

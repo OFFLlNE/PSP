@@ -1,5 +1,8 @@
 package application;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -11,7 +14,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-public class Simulation implements Runnable {
+public class Animation implements Runnable {
 
 	protected static int numberOfCarsIn = 10;
 	protected static int numberOfCarsOut = 10;
@@ -20,44 +23,16 @@ public class Simulation implements Runnable {
 	public static boolean paused = false;
 	public static boolean stopped = false;
 	
-			// variables to make example work. delete asap. Reccommending to make arraylist or sth. 
-			// delete vv
-			static Bot temp;
-			static Bot temp2;
-			static Bot temp3;
-			static Bot temp4;
-		
-			protected static int numberOfCarsAtTheMoment = 0;
-			
-			// delete ^^
-	
-			
-			// IMPORTANT DETAILS:
-			// commands that are issued while a unit is excecuting other command are ignored
-			// commands that would result in unit being out of bounds are also ignored. It will not move at all instead of stopping at the wall
-			// example movement is choppy because the same commands are called over and over again.
+
+	// IMPORTANT DETAILS:
+	// commands that are issued while a unit is excecuting other command are ignored
+	// commands that would result in unit being out of bounds are also ignored. It will not move at all instead of stopping at the wall
+	// example movement is choppy because the same commands are called over and over again.
 	public void run(){
 		while (!stopped){
 			if (!paused){
 				// TODO tick
-				System.out.println("\nnumberOfCarsIn: "+numberOfCarsIn + "\nnumberOfCarsOut: " + numberOfCarsOut +  "\nbotSpeed: " +  botSpeed  + "\nnumberOfbots: " + numberOfbots +  "\npaused: " + paused + "\n\n");
-				
-				
-				// sample
-				if (numberOfCarsAtTheMoment<1){
-					temp = Main.makeBot(100,50, Color.BROWN);
-					temp2 = Main.makeBot(100,50, Color.PINK);
-					temp3 = Main.makeBot(100,50, Color.GREEN);
-					temp4 = Main.makeBot(100,50, Color.BLUE);
-					numberOfCarsAtTheMoment++;
-				}
-				else{
-					moveRight(temp, 5);
-					moveLeft(temp2, 3);
-					moveUp(temp3, 4);
-					moveDown(temp4, 7);
-				}
-				
+
 
 			}
 			// wait
@@ -72,12 +47,21 @@ public class Simulation implements Runnable {
 	}
 	
 	// will be changed. returns amount of time the movement is supposed to take. 
-	public int speedFormula(int distance){
+	public static int speedFormula(int distance){
 		return distance*botSpeed;
 	}
 	
-   	public void moveRight(final Bot bot, int distance){
-   		final double futureX = bot.x+(Plokk.suurus*distance);
+	public static void toggleColor(Bot b){
+		if(b.getFill()==Color.BLUE){
+			b.setFill(Color.BROWN);
+		}
+		else{
+			b.setFill(Color.BLUE);
+		}
+	}
+	
+   	public static void moveRight(final Bot bot, int distance){
+   		final double futureX = bot.x+(Plokk.suurus*distance*Main.pencil_width);
    		
 		if (!bot.isBusy && futureX < Main.level_width*Plokk.suurus){
 			System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
@@ -109,8 +93,8 @@ public class Simulation implements Runnable {
 			System.out.println("[Ignored] Not moving RIGHT by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
 		}
 	}
-   	public void moveLeft(final Bot bot, int distance){
-   		final double futureX = bot.x-(Plokk.suurus*distance);
+   	public static void moveLeft(final Bot bot, int distance){
+   		final double futureX = bot.x-(Plokk.suurus*distance*Main.pencil_width);
    		
 		if (!bot.isBusy && futureX >0){
 			System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
@@ -142,8 +126,8 @@ public class Simulation implements Runnable {
 			System.out.println("[Ignored] Not moving LEFT by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
 		}
 	}   	
-   	public void moveUp(final Bot bot, int distance){
-   		final double futureY = bot.y-(Plokk.suurus*distance);
+   	public static void moveUp(final Bot bot, int distance){
+   		final double futureY = bot.y-(Plokk.suurus*distance*Main.pencil_height);
    		
 		if (!bot.isBusy && futureY > 0){
 			System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
@@ -177,8 +161,8 @@ public class Simulation implements Runnable {
 	}   	
    	
 
-	public void moveDown(final Bot bot, int distance){
-   		final double futureY = bot.y+(Plokk.suurus*distance);
+	public static void moveDown(final Bot bot, int distance){
+   		final double futureY = bot.y+(Plokk.suurus*distance*Main.pencil_height);
    		
 		if (!bot.isBusy && futureY < Main.level_height*Plokk.suurus){
 			System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+bot.x/Plokk.suurus + ", "+bot.y/Plokk.suurus +")");
