@@ -22,6 +22,16 @@ public class Plokk extends Rectangle {
 	public static final int _PARKING_BORDER_TOPBOT = 12;
 	public static final int _PARKING_FILLED_BLUE = 13;
 
+	
+	public static final int _PARKING_P_ = 14;
+	public static final int _PARKING_TOP_LEFT_ = 15;
+	public static final int _PARKING_TOP_RIGHT_ = 16;
+	public static final int _PARKING_BOT_RIGHT_ = 17;
+	public static final int _PARKING_BOT_LEFT_ = 18;
+	public static final int _PARKING_BORDER_SIDE_ = 19;
+	public static final int _PARKING_BORDER_TOPBOT_ = 20;
+	public static final int _PARKING_FILLED_BLUE_ = 21;
+	
 	public static Paint[] textures = new Paint[50];
 	
 	public int nr;

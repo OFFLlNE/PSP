@@ -10,8 +10,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
-import javafx.animation.PathTransition;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -41,30 +39,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.ArcType;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.RectangleBuilder;
-import javafx.util.Duration;
  
 class BlockButton extends ToggleButton{
         public int i;
 }
 
-class Bot extends Rectangle{
-    public boolean isBusy;
-    public double x;
-    public double y;
-
-	public Bot(double arg0, double arg1, double arg2, double arg3) {
-		super(arg0, arg1, arg2, arg3);
-		this.isBusy = false;
-		this.x = arg0;
-		this.y = arg1;
-	}
-}
 
 public class Main extends Application {
 	
@@ -533,11 +513,11 @@ public class Main extends Application {
                
         }
        
-       public static Bot makeBot(int x, int y, Color col){
+       public static Bot makeBot(int x, int y){
            final Bot rect1 = new Bot(x*Plokk.suurus,y*Plokk.suurus,Plokk.suurus*Main.pencil_width,Plokk.suurus*Main.pencil_height);
-           
-           rect1.setFill(col);
-           
+
+           rect1.setFill(Plokk.textures[49]);
+
            Platform.runLater(new Runnable() {                          
                @Override
                public void run() {
@@ -556,7 +536,8 @@ public class Main extends Application {
                 		legal_blocks.add(i);
                         Plokk.textures[i] = new ImagePattern(new Image(new FileInputStream(new File(i + ".png"))));
                 }
-               
+                Plokk.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("r2.png")))); 
+                Plokk.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("r.png")))); 
                 //System.out.println("Done!");
         }
        

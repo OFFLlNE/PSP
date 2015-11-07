@@ -2,7 +2,6 @@ package application;
 import java.sql.Date;
 
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 
 public class Algorithm{
 
@@ -71,8 +70,20 @@ public class Algorithm{
 	 * @param y current coordinate
 	 */
     public static void go(int stepX, int stepY, int x, int y){
-		Bot temp = Main.makeBot(x-stepX,y-stepY, Color.BLUE);
-		Animation.moveRight(temp, 6);
+		Bot temp = Main.makeBot(x-stepX,y-stepY);
+		temp.moveRight( 6);
+		temp.moveDown( 10);
+		temp.moveLeft( 2);
+		temp.toggleColor();
+		temp.moveUp( 5);
+		
+		Bot temp2 = Main.makeBot(x-stepX,y);
+		temp2.moveRight( 2);
+		temp2.toggleColor();
+		temp2.moveRight( 4);
+		temp2.moveRight( 5);
+		
+		
     }
     
     /**
