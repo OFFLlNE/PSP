@@ -10,13 +10,17 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 
+import javafx.animation.PathTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -37,10 +41,29 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.RectangleBuilder;
+import javafx.util.Duration;
  
 class BlockButton extends ToggleButton{
         public int i;
+}
+
+class Bot extends Rectangle{
+    public boolean isBusy;
+    public double x;
+    public double y;
+
+	public Bot(double arg0, double arg1, double arg2, double arg3) {
+		super(arg0, arg1, arg2, arg3);
+		this.isBusy = false;
+		this.x = arg0;
+		this.y = arg1;
+	}
 }
 
 public class Main extends Application {
@@ -86,9 +109,12 @@ public class Main extends Application {
 
 	static int vanaSuurus = Plokk.suurus;
 
+    static Group uus = new Group();
 
 	static Plokk[][] plokid = new Plokk[level_width][level_height];
 	static Plokk[][] plokid2 = new Plokk[level_width][level_height];
+	
+	
 	
 	static ArrayList<Integer> legal_blocks = new ArrayList<Integer>();
 
@@ -507,7 +533,21 @@ public class Main extends Application {
                
         }
        
-       
+       public static Bot makeBot(int x, int y, Color col){
+           final Bot rect1 = new Bot(x*Plokk.suurus,y*Plokk.suurus,Plokk.suurus*Main.pencil_width,Plokk.suurus*Main.pencil_height);
+           
+           rect1.setFill(col);
+           
+           Platform.runLater(new Runnable() {                          
+               @Override
+               public void run() {
+                       Main.uus.getChildren().add(rect1);
+               }
+           });
+           return rect1;
+
+       }
+
         public void readTextures() throws  FileNotFoundException{
                 //System.out.println("reading textures...");
                 Plokk.textures[0] = Color.BLACK;
@@ -519,6 +559,7 @@ public class Main extends Application {
                
                 //System.out.println("Done!");
         }
+       
        
         public static void updateParkingLabels(){
 
@@ -719,8 +760,9 @@ public class Main extends Application {
 
  
             final Canvas canvas = new Canvas(level_width*Plokk.suurus,level_height*Plokk.suurus);
+            
             final GraphicsContext gc = canvas.getGraphicsContext2D();
-               
+
             field_zoom.setText(Plokk.suurus + "");
  
 
@@ -951,6 +993,7 @@ public class Main extends Application {
             root.add(gridPane_infolabels, 0, 5);
                 
             GridPane scrollableContent = new GridPane();
+            GridPane scrollableContent2 = new GridPane();
             scrollableContent.add(canvas, 0, 0);
             scrollableContent.add(level, 0, 0);
             //root.add(canvas, 0, 4);
@@ -1036,7 +1079,10 @@ public class Main extends Application {
            
            
  
-           
+            final Rectangle rectBG = new Rectangle(0,0,Plokk.suurus*level_width,Plokk.suurus*level_height);
+            rectBG.setFill(Color.TRANSPARENT);
+            uus.getChildren().add(rectBG);
+            
             button_block_size_apply.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
@@ -1045,7 +1091,8 @@ public class Main extends Application {
             				Plokk.suurus = uusSuurus;
             				canvas.setHeight(uusSuurus*level_height);
             				canvas.setWidth(uusSuurus*level_width);
-
+            				rectBG.setX(uusSuurus*level_height);
+            				rectBG.setY(uusSuurus*level_width);
             				int x =  Integer.parseInt( pildiLaiusVäli.getText() );
             				int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
             				pildiLaiusVäli.setText(((x/vanaSuurus)*Plokk.suurus)+"");
@@ -1125,7 +1172,8 @@ public class Main extends Application {
                                         level2.getChildren().removeAll(level2.getChildren());
                                         number_of_parking_slots_2 = 0;
                                        
-                                    try {		for(int i = 0; i<Main.level_width; i++){
+                                    try {		
+                                    	for(int i = 0; i<Main.level_width; i++){
                             			for(int j = 0; j<Main.level_height; j++){
 
 
@@ -1177,7 +1225,20 @@ public class Main extends Application {
             final ScrollPane scrollable2 = new ScrollPane();
             scrollable2.setHbarPolicy(ScrollBarPolicy.ALWAYS);
             scrollable2.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-            scrollable2.setContent(level2);
+
+
+            
+            scrollableContent2.add(level2, 0, 0);
+            scrollableContent2.add(uus, 0, 0);
+     
+            scrollable2.setContent(scrollableContent2);
+     
+
+            
+
+            
+            //scrollable2.setContent(level2);
+            //scrollable2.setContent(canvas2);
             
             
             final GridPane simUI_main = new GridPane();
@@ -1192,7 +1253,7 @@ public class Main extends Application {
             final NumberTextField simUI_field_exiting = new NumberTextField();
             simUI.add(simUI_field_exiting, 1, 1);
             
-            Label simUI_field_explaination_robo_speed = new Label("Robot's speed (m/s)");
+            Label simUI_field_explaination_robo_speed = new Label("\"Speed\" (lower=faster)");
             simUI.add(simUI_field_explaination_robo_speed, 2, 0);
             final NumberTextField simUI_field_robo_speed = new NumberTextField();
             simUI.add(simUI_field_robo_speed, 2, 1);
@@ -1227,7 +1288,11 @@ public class Main extends Application {
                             		Simulation.stopped = false;
                             		button_simUI_run.setText("Play/Pause");
                                 	//Simulation.run();
-                            		(new Thread(sim)).start();
+                            		
+                                    //Platform.runLater(sim);
+                            		
+                                    (new Thread(sim)).start();
+                                    
                             	}
                             	else{
                             		//button_simUI_run.setText("Run");
