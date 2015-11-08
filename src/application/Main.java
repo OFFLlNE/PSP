@@ -19,13 +19,10 @@ import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -64,7 +61,7 @@ public class Main extends Application {
 
 	//LAIMIS
 	static boolean started = false;
-	static Plokk ui = null;
+	static Block ui = null;
 	//LAIMIS END
 
 	public static Deque<Integer> l2 = new ArrayDeque<Integer>();
@@ -84,15 +81,15 @@ public class Main extends Application {
 	static int mouseX;
 	static int mouseY;
 
-	static int pildiLaius = level_width*Plokk.suurus;
-	static int pildiKõrgus = level_height*Plokk.suurus;
+	static int pildiLaius = level_width*Block.suurus;
+	static int pildiKõrgus = level_height*Block.suurus;
 
-	static int vanaSuurus = Plokk.suurus;
+	static int vanaSuurus = Block.suurus;
 
     static Group uus = new Group();
 
-	static Plokk[][] plokid = new Plokk[level_width][level_height];
-	static Plokk[][] plokid2 = new Plokk[level_width][level_height];
+	static Block[][] plokid = new Block[level_width][level_height];
+	static Block[][] plokid2 = new Block[level_width][level_height];
 	
 	
 	
@@ -107,9 +104,9 @@ public class Main extends Application {
 	static Animation sim = new Animation();
 
 	class MouseEvent_Handler implements EventHandler<MouseEvent> {
-		Plokk a;
+		Block a;
 
-		public MouseEvent_Handler(Plokk a) {
+		public MouseEvent_Handler(Block a) {
 			this.a = a;
 		}
 
@@ -136,7 +133,7 @@ public class Main extends Application {
 
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
-							((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
+							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
 						}
 					}
 
@@ -183,38 +180,39 @@ public class Main extends Application {
 				}      
 
 				if (button_tool_custom_brush_size.isSelected()){
+					
 					boolean pTäht = false;
 
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
 
 
-							if (currentTool == Plokk._PARKING_P){
+							if (currentTool == Block._PARKING_P){
 								if (i==0&&j==0){
-									replace_block(Plokk._PARKING_TOP_LEFT, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_TOP_LEFT, a.x+i, a.y+j, level);
 								}
 								else if (i==0&&j==pencil_height-1){
-									replace_block(Plokk._PARKING_BOT_LEFT, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_BOT_LEFT, a.x+i, a.y+j, level);
 								}
 								else if (i==pencil_width-1&&j==0){
-									replace_block(Plokk._PARKING_TOP_RIGHT, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_TOP_RIGHT, a.x+i, a.y+j, level);
 								}
 								else if (i==pencil_width-1&&j==pencil_height-1){
-									replace_block(Plokk._PARKING_BOT_RIGHT, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_BOT_RIGHT, a.x+i, a.y+j, level);
 								}
 
 								else if (i==0|| i==pencil_width-1){
-									replace_block(Plokk._PARKING_BORDER_SIDE, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_BORDER_SIDE, a.x+i, a.y+j, level);
 								}
 								else if(j==0||j==pencil_height-1){
-									replace_block(Plokk._PARKING_BORDER_TOPBOT, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_BORDER_TOPBOT, a.x+i, a.y+j, level);
 								}
 								else if (!pTäht){
 									pTäht=true;
-									replace_block(Plokk._PARKING_P, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_P, a.x+i, a.y+j, level);
 								}
 								else{
-									replace_block(Plokk._PARKING_FILLED_BLUE, a.x+i, a.y+j, level);
+									replace_block(Block._PARKING_FILLED_BLUE, a.x+i, a.y+j, level);
 								}
 
 
@@ -226,6 +224,8 @@ public class Main extends Application {
 							}
 						}
 					}
+					
+					
 
 				}      
 
@@ -252,7 +252,7 @@ public class Main extends Application {
 
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
-							((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Plokk)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
+							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
 						}
 					}
 				}
@@ -278,31 +278,72 @@ public class Main extends Application {
 
 				//((Plokk) getNodeFromGridPane(level, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus)  ).muuda(currentTool);
 				if (!button_tool_custom_brush_size.isSelected()){
-					replace_block(currentTool, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus, level);
+					replace_block(currentTool, (int)me.getX()/Block.suurus, (int)me.getY()/Block.suurus, level);
 				}
 				//};
 
-				label_mouse_cordinates.setText("(" + (int)me.getX()/Plokk.suurus + ", " + (int)me.getY()/Plokk.suurus + ")");
+				label_mouse_cordinates.setText("(" + (int)me.getX()/Block.suurus + ", " + (int)me.getY()/Block.suurus + ")");
 
 
 
 			}
 		}      
 	}
-    
+	
+	public static void colorParking(int x, int y,GridPane lvl){
+		boolean pTäht = false;
+
+		for(int i = 0; i< pencil_width; i++){
+			for(int j = 0; j< pencil_height; j++){
+
+					if (i==0&&j==0){
+						replace_block(Block._PARKING_TOP_LEFT, x+i, y+j, lvl);
+					}
+					else if (i==0&&j==pencil_height-1){
+						replace_block(Block._PARKING_BOT_LEFT, x+i, y+j, lvl);
+					}
+					else if (i==pencil_width-1&&j==0){
+						replace_block(Block._PARKING_TOP_RIGHT, x+i, y+j, lvl);
+					}
+					else if (i==pencil_width-1&&j==pencil_height-1){
+						replace_block(Block._PARKING_BOT_RIGHT, x+i, y+j, lvl);
+					}
+
+					else if (i==0|| i==pencil_width-1){
+						replace_block(Block._PARKING_BORDER_SIDE, x+i, y+j, lvl);
+					}
+					else if(j==0||j==pencil_height-1){
+						replace_block(Block._PARKING_BORDER_TOPBOT, x+i, y+j, lvl);
+					}
+					else if (!pTäht){
+						pTäht=true;
+						replace_block(Block._PARKING_P, x+i, y+j, lvl);
+					}
+					else{
+						replace_block(Block._PARKING_FILLED_BLUE, x+i, y+j, lvl);
+					}
+
+
+			}
+		}
+	}
+	
+    public static int getType(int x, int y){
+    	return ((Block) Main.getNodeFromGridPane(Main.level2, x, y)).nr;
+    }
     // FILL ALGORITHM
-    public static Deque<Plokk> to_mark = new ArrayDeque<Plokk>();
-    public static void mark_neighbours(Plokk a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl){
+    public static Deque<Block> to_mark = new ArrayDeque<Block>();
+    public static void mark_neighbours(Block a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl){
     	if (a.nr != eelmine){
 
     		//System.out.println("ok!");
     	}
 
 
-    	Plokk W = neighbourW(a.x, a.y, lvl);
-    	Plokk S = neighbourS(a.x, a.y, lvl);
-    	Plokk E = neighbourE(a.x, a.y, lvl);
-    	Plokk N = neighbourN(a.x, a.y, lvl);
+    	Block W = neighbourW(a.x, a.y, lvl);
+    	Block S = neighbourS(a.x, a.y, lvl);
+    	Block E = neighbourE(a.x, a.y, lvl);
+    	Block N = neighbourN(a.x, a.y, lvl);
 
     	if (a.nr != 6){
     		a.setFill(b);
@@ -334,7 +375,7 @@ public class Main extends Application {
     	}
 
     	catch(Exception e){
-    		new Alert(Alert.AlertType.ERROR, "Tere", ButtonType.OK);
+    		//new Alert(Alert.AlertType.ERROR, "Tere", ButtonType.OK);
     		//System.out.println(e);
     		to_mark.clear();
     		return;
@@ -345,30 +386,30 @@ public class Main extends Application {
    
    
    
-    public static Plokk neighbourS(int x, int y, GridPane lvl){
-        return (Plokk)getNodeFromGridPane(lvl, x, y+1);
+    public static Block neighbourS(int x, int y, GridPane lvl){
+        return (Block)getNodeFromGridPane(lvl, x, y+1);
        
     }
    
-    public static Plokk neighbourW(int x, int y, GridPane lvl){
-        return (Plokk)getNodeFromGridPane(lvl, x+1, y);
+    public static Block neighbourW(int x, int y, GridPane lvl){
+        return (Block)getNodeFromGridPane(lvl, x+1, y);
        
     }
    
    
-    public static Plokk neighbourE(int x, int y, GridPane lvl){
-        return (Plokk)getNodeFromGridPane(lvl, x-1, y);
+    public static Block neighbourE(int x, int y, GridPane lvl){
+        return (Block)getNodeFromGridPane(lvl, x-1, y);
        
     }
    
-    public static Plokk neighbourN(int x, int y, GridPane lvl){
-        return (Plokk)getNodeFromGridPane(lvl, x, y-1);
+    public static Block neighbourN(int x, int y, GridPane lvl){
+        return (Block)getNodeFromGridPane(lvl, x, y-1);
        
     }
    
  
    
-    public static Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
+    public static Block getNodeFromGridPane(GridPane gridPane, int col, int row) {
         //long a = System.currentTimeMillis();
     	if (gridPane==level){
     		return plokid[col][row];
@@ -429,7 +470,7 @@ public class Main extends Application {
                         for(int j = 0; j<=level_width-1; j++){
                         	//System.out.println("("+ i + ", " + j + ") - " + a);
                         	//System.out.println((Plokk) getNodeFromGridPane(level, j, i));
-                        	r.write(         ((Plokk) getNodeFromGridPane(level, j, i)).nr              );
+                        	r.write(         ((Block) getNodeFromGridPane(level, j, i)).nr              );
                         }
                         //System.out.println();
                 }
@@ -440,7 +481,7 @@ public class Main extends Application {
 
        
         public void add_block(int nr, int j, int i, GridPane lvl){
-                Plokk r = new Plokk(   nr, j, i  );
+                Block r = new Block(   nr, j, i  );
                
                 if (lvl == level ){
                         r.addEventHandler(MouseEvent.MOUSE_ENTERED, new MouseEvent_Handler(r));
@@ -472,7 +513,7 @@ public class Main extends Application {
         }
        
         public static void add_block2(int nr, int j, int i){
-            Plokk r = new Plokk(   nr, j, i  );
+            Block r = new Block(   nr, j, i  );
            
             level2.add(r, j, i);
             plokid2[j][i] = r;
@@ -485,7 +526,7 @@ public class Main extends Application {
     }       
        
         public static void replace_block(int nr, int j, int i, GridPane lvl){
-                Plokk muudetav = (Plokk) getNodeFromGridPane(lvl, j, i);
+                Block muudetav = (Block) getNodeFromGridPane(lvl, j, i);
                
                 if (nr == 1){
                         if (lvl == level){
@@ -514,9 +555,9 @@ public class Main extends Application {
         }
        
        public static Bot makeBot(int x, int y){
-           final Bot rect1 = new Bot(x*Plokk.suurus,y*Plokk.suurus,Plokk.suurus*Main.pencil_width,Plokk.suurus*Main.pencil_height);
+           final Bot rect1 = new Bot(x*Block.suurus,y*Block.suurus,Block.suurus*Main.pencil_width,Block.suurus*Main.pencil_height);
 
-           rect1.setFill(Plokk.textures[49]);
+           rect1.setFill(Block.textures[49]);
 
            Platform.runLater(new Runnable() {                          
                @Override
@@ -530,14 +571,14 @@ public class Main extends Application {
 
         public void readTextures() throws  FileNotFoundException{
                 //System.out.println("reading textures...");
-                Plokk.textures[0] = Color.BLACK;
+                Block.textures[0] = Color.BLACK;
                
-                for (int i = 1; i<14; i++){
+                for (int i = 1; i<27; i++){
                 		legal_blocks.add(i);
-                        Plokk.textures[i] = new ImagePattern(new Image(new FileInputStream(new File(i + ".png"))));
+                        Block.textures[i] = new ImagePattern(new Image(new FileInputStream(new File(i + ".png"))));
                 }
-                Plokk.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("r2.png")))); 
-                Plokk.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("r.png")))); 
+                Block.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("r2.png")))); 
+                Block.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("r.png")))); 
                 //System.out.println("Done!");
         }
        
@@ -572,7 +613,7 @@ public class Main extends Application {
 			number_of_parking_slots_2 = 0;
 			for(int i = 0; i<=level_height-1; i++){
 				for(int j = 0; j<=level_width-1; j++){
-					l2.add(((Plokk) getNodeFromGridPane(level, j, i)).nr);
+					l2.add(((Block) getNodeFromGridPane(level, j, i)).nr);
 				}
 			} 
 			level.getChildren().removeAll(level.getChildren());
@@ -583,7 +624,7 @@ public class Main extends Application {
 			}
 			for(int i = 0; i<=level_height-1; i++){
 				for(int j = 0; j<=level_width-1; j++){
-					l2.add(((Plokk) getNodeFromGridPane(level2, j, i)).nr);
+					l2.add(((Block) getNodeFromGridPane(level2, j, i)).nr);
 				}
 			} 
 			level2.getChildren().removeAll(level2.getChildren());
@@ -652,7 +693,7 @@ public class Main extends Application {
             		temp2.setHeight(16
             				//Plokk.suurus
             				);
-            		temp2.setFill(Plokk.textures[i]);
+            		temp2.setFill(Block.textures[i]);
 
 
             		temp.setGraphic(temp2);
@@ -740,11 +781,11 @@ public class Main extends Application {
             
 
  
-            final Canvas canvas = new Canvas(level_width*Plokk.suurus,level_height*Plokk.suurus);
+            final Canvas canvas = new Canvas(level_width*Block.suurus,level_height*Block.suurus);
             
             final GraphicsContext gc = canvas.getGraphicsContext2D();
 
-            field_zoom.setText(Plokk.suurus + "");
+            field_zoom.setText(Block.suurus + "");
  
 
 
@@ -799,10 +840,10 @@ public class Main extends Application {
             button_newUI_gate.setToggleGroup(toolsNew);
             button_newUI_clear.setToggleGroup(toolsNew);
             
-            button_newUI_draw_wall.setGraphic(new Rectangle(16,16,Plokk.textures[5]));
-            button_newUI_draw_parking.setGraphic(new Rectangle(16,16,Plokk.textures[1]));
-            button_newUI_gate.setGraphic(new Rectangle(16,16,Plokk.textures[4]));
-            button_newUI_clear.setGraphic(new Rectangle(16,16,Plokk.textures[2]));
+            button_newUI_draw_wall.setGraphic(new Rectangle(16,16,Block.textures[5]));
+            button_newUI_draw_parking.setGraphic(new Rectangle(16,16,Block.textures[1]));
+            button_newUI_gate.setGraphic(new Rectangle(16,16,Block.textures[4]));
+            button_newUI_clear.setGraphic(new Rectangle(16,16,Block.textures[2]));
 
             newUI_toolbuttons.add(button_newUI_draw_wall,1,0);
             newUI_toolbuttons.add(button_newUI_draw_parking,2,0);
@@ -1060,7 +1101,7 @@ public class Main extends Application {
            
            
  
-            final Rectangle rectBG = new Rectangle(0,0,Plokk.suurus*level_width,Plokk.suurus*level_height);
+            final Rectangle rectBG = new Rectangle(0,0,Block.suurus*level_width,Block.suurus*level_height);
             rectBG.setFill(Color.TRANSPARENT);
             uus.getChildren().add(rectBG);
             
@@ -1068,16 +1109,16 @@ public class Main extends Application {
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
             				int uusSuurus =  Integer.parseInt( field_zoom.getText() );
-            				vanaSuurus = Plokk.suurus;
-            				Plokk.suurus = uusSuurus;
+            				vanaSuurus = Block.suurus;
+            				Block.suurus = uusSuurus;
             				canvas.setHeight(uusSuurus*level_height);
             				canvas.setWidth(uusSuurus*level_width);
             				rectBG.setX(uusSuurus*level_height);
             				rectBG.setY(uusSuurus*level_width);
             				int x =  Integer.parseInt( pildiLaiusVäli.getText() );
             				int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
-            				pildiLaiusVäli.setText(((x/vanaSuurus)*Plokk.suurus)+"");
-            				pildiKõrgusVäli.setText(((y/vanaSuurus)*Plokk.suurus)+"");
+            				pildiLaiusVäli.setText(((x/vanaSuurus)*Block.suurus)+"");
+            				pildiKõrgusVäli.setText(((y/vanaSuurus)*Block.suurus)+"");
 
             				button_refresh_image.fire();
             				reset();
@@ -1089,8 +1130,8 @@ public class Main extends Application {
             button_reset_image_size.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
-            				pildiLaiusVäli.setText(level_width*Plokk.suurus+"");
-            				pildiKõrgusVäli.setText(level_height*Plokk.suurus+"");
+            				pildiLaiusVäli.setText(level_width*Block.suurus+"");
+            				pildiKõrgusVäli.setText(level_height*Block.suurus+"");
             				
             			}      
             		}
@@ -1127,7 +1168,7 @@ public class Main extends Application {
             					pildiLaius = Integer.parseInt(pildiLaiusVäli.getText());
             					pildiKõrgus = Integer.parseInt(pildiKõrgusVäli.getText());
             					gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
-            					gc.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
+            					gc.fillRect(Block.suurus,Block.suurus,pildiLaius,pildiKõrgus);
             					//gc2.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
             					//gc2.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
             				}
@@ -1158,7 +1199,7 @@ public class Main extends Application {
                             			for(int j = 0; j<Main.level_height; j++){
 
 
-                            				int uusP = ((Plokk) Main.getNodeFromGridPane(Main.level, i, j)).nr; // milline on vana plokk kohas i, j
+                            				int uusP = ((Block) Main.getNodeFromGridPane(Main.level, i, j)).nr; // milline on vana plokk kohas i, j
                             				//multiple entries - per 9 piece batches
 
                             				
@@ -1172,7 +1213,13 @@ public class Main extends Application {
                             			}
                             		}
                                     		// this is where laimis's code used to be that is now in class Algorithm
-                                            Algorithm.run();   
+
+                                            //Algorithm.run();   
+
+                                    	Algorithm gg = new Algorithm();
+                                    	gg.run();
+                                            //(new Thread(gg)).start();
+                                            
                                         }
                                     catch (Exception erind) {
                                         System.out.println(erind + " - algorithm error");

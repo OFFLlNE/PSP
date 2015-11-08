@@ -1,6 +1,7 @@
 package application;
 
-import java.sql.Date;
+import java.util.Date;
+
 /**
  * Parking spot class. Objects that contain all the information about each parking spot.
  * @author FrozenImpact
@@ -26,6 +27,31 @@ public class ParkingSpot {
 		this.expirationDate = expirationDate;
 	}
 
+	public boolean occupied(){
+		if(this.model == null && this.custodian == null){
+			return false;
+		}
+		return true;
+	}
+	
+	public double getDistance(){
+		return this.distanceFromGate;
+	}
+	public int getX(){
+		return this.x;
+	}
+	public int getY(){
+		return this.y;
+	}
+	
+	public ParkingSpot occupy(String custodian, String model, Date expirationDate){
+		this.custodian = custodian;
+		this.model = model;
+		this.ingestionDate = new Date(System.currentTimeMillis());
+		this.expirationDate = expirationDate;
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		return "ParkingSpot [x=" + x + ", y=" + y + ", distanceFromGate="

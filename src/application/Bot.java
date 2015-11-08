@@ -29,23 +29,68 @@ public class Bot extends Rectangle{
 	
 
     public double get_X() {
-		return this.x/Plokk.suurus;
+		return this.x/Block.suurus;
 	}
 
 	public double get_Y() {
-		return this.y/Plokk.suurus;
+		return this.y/Block.suurus;
 	}
 	
 	public void toggleColor(){
 		if (!this.isBusy){
-			System.out.println("[Understood] Respraying. I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Understood] Respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
-			if(this.getFill()==Plokk.textures[49]){
-				this.setFill(Plokk.textures[48]);
-			}
-			else{
-				this.setFill(Plokk.textures[49]);
-			}
+
+			Main.replace_block(0, (int)this.x/Block.suurus, (int)this.y/Block.suurus, Main.level2);
+
+			
+			boolean pTäht = false;
+			
+			int iks = (int)this.x/Block.suurus;
+			int igr = (int)this.y/Block.suurus;
+			
+			for(int i = 0; i< Main.pencil_width; i++){
+				for(int j = 0; j< Main.pencil_height; j++){
+
+					if (i==0&&j==0){
+						Main.replace_block(Block._PARKING_TOP_LEFT, iks+i, igr+j, Main.level2);
+					}
+					else if (i==0&&j==Main.pencil_height-1){
+						Main.replace_block(Block._PARKING_BOT_LEFT, iks+i, igr+j, Main.level2);
+					}
+					else if (i==Main.pencil_width-1&&j==0){
+						Main.replace_block(Block._PARKING_TOP_RIGHT, iks+i, igr+j, Main.level2);
+					}
+					else if (i==Main.pencil_width-1&&j==Main.pencil_height-1){
+						Main.replace_block(Block._PARKING_BOT_RIGHT, iks+i, igr+j, Main.level2);
+					}
+
+					else if (i==0|| i==Main.pencil_width-1){
+						Main.replace_block(Block._PARKING_BORDER_SIDE, iks+i, igr+j, Main.level2);
+					}
+					else if(j==0||j==Main.pencil_height-1){
+						Main.replace_block(Block._PARKING_BORDER_TOPBOT, iks+i, igr+j, Main.level2);
+					}
+					else if (!pTäht){
+						pTäht=true;
+						Main.replace_block(Block._PARKING_P, iks+i, igr+j, Main.level2);
+					}
+					else{
+						Main.replace_block(Block._PARKING_FILLED_BLUE, iks+i, igr+j, Main.level2);
+					}
+
+
+					}
+				}
+			
+			
+			
+//			if(this.getFill()==Plokk.textures[49]){
+//				this.setFill(Plokk.textures[48]);
+//			}
+//			else{
+//				this.setFill(Plokk.textures[49]);
+//			}
 			this.isBusy=false;
 	        if (!this.orders_comm.isEmpty()){
 				String k = this.orders_comm.poll();
@@ -70,22 +115,24 @@ public class Bot extends Rectangle{
 			
 		}
 		else{
-			System.out.println("[Queing] Not respraying. I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Queing] Not respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 		
 			this.orders_dist.add(0);
 			this.orders_comm.add("C");
 		}
 	}
 	
+
+	
    	public void moveRight(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        
 	        //
-	   		final double futureX = this.x+(Plokk.suurus*distance*Main.pencil_width);
+	   		final double futureX = this.x+(Block.suurus*distance);
 	        path.getElements().add(new MoveTo(this.x+this.getWidth()/2,   this.y+this.getHeight()/2));
 	        path.getElements().add(new LineTo(futureX+this.getWidth()/2, this.y+this.getHeight()/2));
 	        //
@@ -132,7 +179,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 			
-			System.out.println("[Queing] Not moving RIGHT by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Queing] Not moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("R");
 		}
@@ -141,11 +188,11 @@ public class Bot extends Rectangle{
    	public void moveLeft(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
-	   		final double futureX = this.x-(Plokk.suurus*distance*Main.pencil_width);
+	   		final double futureX = this.x-(Block.suurus*distance);
 	        path.getElements().add(new MoveTo(this.x+this.getWidth()/2,this.y+this.getHeight()/2));
 	        path.getElements().add(new LineTo(futureX+this.getWidth()/2, this.y+this.getHeight()/2));
 	        //
@@ -190,7 +237,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving LEFT by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Queing] Not moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 
 			this.orders_dist.add(distance);
 			this.orders_comm.add("L");
@@ -199,11 +246,11 @@ public class Bot extends Rectangle{
    	public void moveUp(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
-	   		final double futureY = this.y-(Plokk.suurus*distance*Main.pencil_height);
+	   		final double futureY = this.y-(Block.suurus*distance);
 	        path.getElements().add(new MoveTo(this.x+this.getWidth()/2, this.y+this.getHeight()/2));
 	        path.getElements().add(new LineTo(this.x+this.getWidth()/2, futureY+this.getHeight()/2));
 	        //
@@ -249,7 +296,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving UP by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Queing] Not moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("U");
 		}
@@ -259,11 +306,11 @@ public class Bot extends Rectangle{
 	public void moveDown(int distance){
    		
 		if (!this.isBusy ){
-			System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
-	   		final double futureY = this.y+(Plokk.suurus*distance*Main.pencil_height);
+	   		final double futureY = this.y+(Block.suurus*distance);
 	        path.getElements().add(new MoveTo(this.x+this.getWidth()/2, this.y+this.getHeight()/2));
 	        path.getElements().add(new LineTo(this.x+this.getWidth()/2, futureY+this.getHeight()/2));
 	        //
@@ -308,7 +355,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving DOWN by "+distance+". I am here:  ("+this.x/Plokk.suurus + ", "+this.y/Plokk.suurus +")");
+			System.out.println("[Queing] Not moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("D");
 		}

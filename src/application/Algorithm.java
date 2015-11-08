@@ -1,65 +1,46 @@
 package application;
-import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Date;
 
-import javafx.scene.layout.GridPane;
-
-public class Algorithm{
+public class Algorithm implements Runnable{
 
 	static int gateX = 0;
 	static int gateY = 0;
     static int pl = 0;
-    static int pk = 0;
-    
-    /**
-     * Gets the type of the land.
-     * @param x coordinate
-     * @param y coordinate
-     * @return type of the land. Ranges from 1-13
-     */
-    public static int getType(int x, int y){
-    	return ((Plokk) Main.getNodeFromGridPane(Main.level2, x, y)).nr;
-    }
+    static int pk = 0; 
     
     /**
      * TODO
      */
-	public static void run(){
-		
+	public void run(){		
 		pl = Main.pencil_width;
 		pk = Main.pencil_height;		
 
 		for(int i = 0; i<Main.level_width; i++){
 			for(int j = 0; j<Main.level_height; j++){
-				// milline on vana plokk kohas
-				int uusP = ((Plokk) Main.getNodeFromGridPane(Main.level, i, j)).nr;
-
-				if(uusP == 4 && gateX == 0 && gateY == 0){
+				if(Main.getType(i, j) == 4 && gateX == 0 && gateY == 0){
 					gateX = i;
 					gateY = j;
-				}
-				
-				// priit lisas; ignoreerib vanu parkimiskohti
-				if (uusP == 1 | uusP ==  7 | uusP ==  8 | uusP ==  9 | uusP ==  10 | uusP ==  11 | uusP ==  12 | uusP ==  13){
-					uusP = 2;
 				}
 			}
 		}
 		
-		if(getType(gateX-1, gateY) == 2){
+		fillSpotParking(gateX, gateY);		
+		fillPixelParking();
+		//clearParkings();
+
+		if(Main.getType(gateX-1, gateY) == 2){
 			go(-pl, 0, gateX-pl, gateY);
 		}
-		else if(getType(gateX, gateY-1) == 2){
+		else if(Main.getType(gateX, gateY-1) == 2){
 			go(0, -pk, gateX, gateY-pk);
 		}
-		else if(getType(gateX, gateY+pk) == 2){
+		else if(Main.getType(gateX, gateY+pk) == 2){
 			go(0, pk, gateX, gateY+pk);
 		}
-		else if(getType(gateX+pl, gateY) == 2){
+		else if(Main.getType(gateX+pl, gateY) == 2){
 			go(pl, 0, gateX+pl, gateY);
 		}
-		
-		fillSpotParking(gateX, gateY);
-		fillPixelParking();
 	}
    
 	/**
@@ -69,61 +50,243 @@ public class Algorithm{
 	 * @param x current coordinate
 	 * @param y current coordinate
 	 */
-    public static void go(int stepX, int stepY, int x, int y){
-		Bot temp = Main.makeBot(x-stepX,y-stepY);
-		temp.moveRight( 6);
-		temp.moveDown( 10);
-		temp.moveLeft( 2);
-		temp.toggleColor();
-		temp.moveUp( 5);
+	private static void go(int stepX, int stepY, int x, int y){
 		
-		Bot temp2 = Main.makeBot(x-stepX,y);
-		temp2.moveRight( 2);
-		temp2.toggleColor();
-		temp2.moveRight( 4);
-		temp2.moveRight( 5);
+		/*
+		Bot r2 = Main.makeBot(x-stepX,y-stepY);
+		while(true){
+		r2.moveDown(5);
+		r2.moveLeft(15);
+		r2.moveDown(5);
+
+		boolean kas = true;
+		while(kas){
+
+			if (!r2.isBusy){
+				colorOccupied((int)r2.get_X(), (int)r2.get_Y());
+				kas=false;
+			}
+
+			try {
+				Thread.currentThread().sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		r2.moveDown(1);
+		
+		}
+		*/
+		
+		
+		/*	
+		Bot r1 = Main.makeBot(x-stepX,y-stepY);
+		
+		ArrayList<String> c = new ArrayList<String>();
+		c.add("a1,Audi R1,42424356");
+//		c.add("a2,Audi R2,456356");
+//		c.add("a3,Audi R3,45654356");
+//		c.add("a4,Audi R3,45654356");
+//		c.add("a4,Audi R4,644356");
+//		c.add("a5,Audi R5,424356");
+//		c.add("a6,Audi R6,932356");
+//		c.add("a7,Audi R7,4424356");
+//		c.add("a8,Audi R8,434");
+//		c.add("a9,Audi R9,654656");
+//		c.add("a170,Audi R10,656");
+//		c.add("a79,Audi R9,654656");
+//		c.add("a130,Audi R10,656");
+//		c.add("a45,Audi R9,654656");
+		
+		while(c.size() != 0){
+			String[] inf = c.get(0).split(",");
+			String custodian = inf[0];
+			String model = inf[1];
+			Date expirationDate = new Date(Integer.parseInt(inf[2]));
+			
+			ParkingSpot parkingSpot;
+			if((parkingSpot = ParkingSpotManager.getEmptyCheckers()) != null){
+				
+				String waypoints = pathfind(x, y, parkingSpot.getX(), parkingSpot.getY(), "");
+				System.out.println(waypoints);
+//				waypoints = optimize(waypoints);
+//				System.out.println(waypoints);
+				
+				for (String string : waypoints.split(",,,")) {
+					System.out.println(string);
+				}
+				
+				r1.moveDown(1);
+				r1.moveLeft(3);
+				r1.moveDown(1);
+				
+				while(r1.isBusy){
+					Thread.sleep(200);
+				}
+				parkingSpot.occupy(custodian, model, expirationDate);
+				colorOccupied(parkingSpot.getX(), parkingSpot.getY());
+				
+//				r1.moveUp(1);
+//				r1.moveRight(3);
+//				r1.moveUp(1);
+				
+				
+			}
+			else{
+				System.out.println("no space left for checkers");
+			}
+			
+			c.remove(0);
+		}
+		}
+			
+		*/
+
+
 		
 		
     }
     
+	private static String pathfind(int sX, int sY, int tX, int tY, String curPath){
+		curPath = curPath+",,,"+sX+","+sY;
+		if(sX == tX && sY == tY){
+			return curPath;
+		}
+		else if(containsAll(sX, sY, 2)){
+			String left;
+			String right;
+			String down;
+			String up;
+			if(curPath.contains((sX-pl)+","+sY)){
+				left = null;
+			}
+			else{
+				left = pathfind(sX-pl, sY, tX, tY, curPath);
+			}
+			if(curPath.contains((sX+pl)+","+sY)){
+				right = null;
+			}
+			else{
+				right = pathfind(sX+pl, sY, tX, tY, curPath);
+			}
+			if(curPath.contains(sX+","+(sY-pk))){
+				up = null;
+			}
+			else{
+				up = pathfind(sX, sY-pk, tX, tY, curPath);
+			}
+			if(curPath.contains(sX+","+(sY+pk))){
+				down = null;
+			}
+			else{
+				down = pathfind(sX, sY+pk, tX, tY, curPath);
+			}
+			return compareArraySizes(compareArraySizes(compareArraySizes(left, right),up),down);
+		}
+		else{
+			return null;
+		}
+	}
+	
+//	private static String optimize(String path){
+//		if(){
+//			
+//		}
+//	}
+	
+	private static String compareArraySizes(String left, String right){
+		if(left == null && right == null){
+			return null;
+		}
+		else if(left == null){
+			return right;
+		}
+		else if(right == null){
+			return left;
+		}
+		else if(right.length() < left.length()){
+			return right;
+		}
+		else{
+			return left;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
     /**
      * Adds a parking spot. Includes coloring the canvas and creating an empty parking object.
      * @param x where to create the given parking spot.
      * @param y where to create the given parking spot.
      * @param lvl for internal use. ~priidrik
      */
-    public static void addParking(int x, int y, GridPane lvl){
-    	new ParkingSpot(x, y, "", "", new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()));
-    	
-    	boolean pTäht = false;
+    private static void createParkingSpot(int x, int y){
+    	//ParkingSpotManager.add(new ParkingSpot(x, y, null, null, null, null));
+    	//colorOccupied(x, y);
+    	Main.colorParking(x, y, Main.level2);
+    }
+    
+    public static void colorOccupied(int x, int y){
         for(int i = 0; i< pl; i++){
             for(int j = 0; j< pk; j++){                   
                 if (i==0&&j==0){
-                        Main.replace_block(7, x+i, y+j, lvl);
+                        Main.replace_block(14, x+i, y+j, Main.level2);
                 }
                 else if (i==0&&j==pk-1){
-                        Main.replace_block(10, x+i, y+j, lvl);
+                        Main.replace_block(17, x+i, y+j, Main.level2);
                 }
                 else if (i==pl-1&&j==0){
-                        Main.replace_block(8, x+i, y+j, lvl);
+                        Main.replace_block(15, x+i, y+j, Main.level2);
                 }
                 else if (i==pl-1&&j==pk-1){
-                        Main.replace_block(9, x+i, y+j, lvl);
+                        Main.replace_block(16, x+i, y+j, Main.level2);
+                }               
+                else if (i==1 && j == 0){
+                        Main.replace_block(18, x+i, y+j, Main.level2);
                 }
-               
-                else if (i==0|| i==pl-1){
-                        Main.replace_block(11, x+i, y+j, lvl);
+                else if (i==2 && j == 0){
+                    Main.replace_block(19, x+i, y+j, Main.level2);
                 }
-                else if(j==0||j==pk-1){
-                        Main.replace_block(12, x+i, y+j, lvl);
+                else if (i==3 && j == 0){
+                    Main.replace_block(20, x+i, y+j, Main.level2);
                 }
-                else if (!pTäht){
-                        pTäht=true;
-                        Main.replace_block(1, x+i, y+j, lvl);
+                else if (i==0 && j == 1){
+                    Main.replace_block(21, x+i, y+j, Main.level2);
+                }
+                else if (i==pl-1 && j == 1){
+                    Main.replace_block(23, x+i, y+j, Main.level2);
+
+                }
+                else if (i==1 && j == pk-1){
+                    Main.replace_block(24, x+i, y+j, Main.level2);
+                }
+                else if (i==2 && j == pk-1){
+                    Main.replace_block(25, x+i, y+j, Main.level2);
+                }
+                else if (i==3 && j == pk-1){
+                    Main.replace_block(26, x+i, y+j, Main.level2);
                 }
                 else{
-                        Main.replace_block(13, x+i, y+j, lvl);
-                }               
+                    Main.replace_block(22, x+i, y+j, Main.level2);
+                }
             }
         }
     }
@@ -135,10 +298,10 @@ public class Algorithm{
      * @param the type to look for
      * @return true, if this area contains at least one type of a given object.
      */
-    public static boolean contains(int x, int y, int type){
+    private boolean contains(int x, int y, int type){
         for(int i = 0; i<pl; i++){
                 for(int j = 0; j<pk; j++){
-                        if(getType(x+i, y+j) == type){
+                        if(Main.getType(x+i, y+j) == type){
                                 return true;
                         }
                 }
@@ -159,7 +322,7 @@ public class Algorithm{
         		if(x+i < 0 || x+i > Main.level_width || y+j > Main.level_height || y+j < 0){
         			return false;
         		}
-                if(getType(x+i, y+j) != type){
+                if(Main.getType(x+i, y+j) != type){
                         return false;
                 }
             }
@@ -168,36 +331,36 @@ public class Algorithm{
     }
     
     /**
-     * Fills the parking lot with maximum amount of parking spots.
+     * Fills the parking lot with maximum amount of parking spots in regards to the gate.
      * @param gateX the coordinate of the main gate
      * @param gateY the coordinate of the main gate
      */
-    public static void fillSpotParking(int gateX, int gateY){
+    private static void fillSpotParking(int gateX, int gateY){
     	for(int i = gateX; i<Main.level_width; i=i+pl){
     		for(int j = gateY; j<Main.level_height; j=j+pk){		
         		if(containsAll(i, j, 2) == true){
-        			addParking(i, j, Main.level2);
+        			createParkingSpot(i, j);
         		}       		
         	}
     	}
     	for(int i = gateX; i>0; i=i-pl){
     		for(int j = gateY; j<Main.level_height; j=j+pk){		
         		if(containsAll(i, j, 2) == true){
-        			addParking(i, j, Main.level2);
+        			createParkingSpot(i, j);
         		}       		
         	}
     	}
     	for(int i = gateX; i>0; i=i-pl){
     		for(int j = gateY; j>0; j=j-pk){		
         		if(containsAll(i, j, 2) == true){
-        			addParking(i, j, Main.level2);
+        			createParkingSpot(i, j);
         		}       		
         	}
     	}
     	for(int i = gateX; i<Main.level_width; i=i+pl){
     		for(int j = gateY; j>0; j=j-pk){		
         		if(containsAll(i, j, 2) == true){
-        			addParking(i, j, Main.level2);
+        			createParkingSpot(i, j);
         		}       		
         	}
     	}
@@ -206,11 +369,28 @@ public class Algorithm{
     /**
      * Fills uneven spots with parking spots.
      */
-    public static void fillPixelParking(){
+    private static void fillPixelParking(){
     	for(int i = 0; i<Main.level_width; i++){
     		for(int j = 0; j<Main.level_height; j++){    			
         		if(containsAll(i, j, 2) == true){
-        			addParking(i, j, Main.level2);
+        			createParkingSpot(i, j);
+        		}       		
+        	}
+    	}
+    }
+    
+    /**
+     * TODO temporary method until priit fixes up the code
+     */
+    private static void clearParkings(){
+    	for(int i = 0; i<Main.level_width; i++){
+    		for(int j = 0; j<Main.level_height; j++){
+    			int type = Main.getType(i, j);
+        		if(type == 14 || type == 15 || type == 16 || type == 17 || type == 18
+        				|| type == 19 || type == 20 || type == 21
+        				|| type == 22 || type == 23 || type == 24
+        				|| type == 25 || type == 26){
+        			Main.replace_block(2, i, j, Main.level2);
         		}       		
         	}
     	}

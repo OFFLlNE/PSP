@@ -4,7 +4,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
-public class Plokk extends Rectangle {
+public class Block extends Rectangle {
 	
 	// constants
 	public static final int _SOLID_BLACK = 0;
@@ -46,7 +46,7 @@ public class Plokk extends Rectangle {
 
 	public Paint see;
 	
-	Plokk(int pos, int x, int y){
+	Block(int pos, int x, int y){
 		
 		nr = pos;
 		this.setX(0);
@@ -77,7 +77,27 @@ public class Plokk extends Rectangle {
 	}
 	
 	
-	
+	public boolean isMoveable(){
+		int n = this.nr;
+		if (
+				n ==  _PARKING_P||	
+				n ==  _NO_BLOCK||	
+				n ==  _ROBOT_ROAD||	
+				n ==  _PARKING_TOP_LEFT||
+				n ==  _PARKING_TOP_RIGHT||
+				n ==  _PARKING_BOT_RIGHT||
+				n ==  _PARKING_BOT_LEFT||
+				n ==  _PARKING_BORDER_SIDE||
+				n ==  _PARKING_BORDER_TOPBOT||
+				n ==  _PARKING_FILLED_BLUE
+				
+				){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	
 
 
