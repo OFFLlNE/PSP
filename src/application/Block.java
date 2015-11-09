@@ -65,6 +65,7 @@ public class Block extends Rectangle {
 	public void muuda(int pos){
 		if (this.nr != 6){
 		this.nr = pos;
+		
 		this.setFill(textures[pos]);
 		this.see = textures[pos];
 		
@@ -77,12 +78,12 @@ public class Block extends Rectangle {
 	}
 	
 	
-	public boolean isMoveable(){
-		int n = this.nr;
+	public static boolean isMoveable(int n){
 		if (
 				n ==  _PARKING_P||	
 				n ==  _NO_BLOCK||	
 				n ==  _ROBOT_ROAD||	
+				n ==  _ROBOT_GATEWAY||	
 				n ==  _PARKING_TOP_LEFT||
 				n ==  _PARKING_TOP_RIGHT||
 				n ==  _PARKING_BOT_RIGHT||

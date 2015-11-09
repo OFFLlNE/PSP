@@ -28,12 +28,12 @@ public class Bot extends Rectangle{
 	}
 	
 
-    public double get_X() {
-		return this.x/Block.suurus;
+    public int getRobotX() {
+		return (int)this.x/Block.suurus;
 	}
 
-	public double get_Y() {
-		return this.y/Block.suurus;
+	public int getRobotY() {
+		return (int)this.y/Block.suurus;
 	}
 	
 	public void toggleColor(){
@@ -41,56 +41,12 @@ public class Bot extends Rectangle{
 			System.out.println("[Understood] Respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 
-			Main.replace_block(0, (int)this.x/Block.suurus, (int)this.y/Block.suurus, Main.level2);
-
-			
-			boolean pTäht = false;
-			
-			int iks = (int)this.x/Block.suurus;
-			int igr = (int)this.y/Block.suurus;
-			
-			for(int i = 0; i< Main.pencil_width; i++){
-				for(int j = 0; j< Main.pencil_height; j++){
-
-					if (i==0&&j==0){
-						Main.replace_block(Block._PARKING_TOP_LEFT, iks+i, igr+j, Main.level2);
-					}
-					else if (i==0&&j==Main.pencil_height-1){
-						Main.replace_block(Block._PARKING_BOT_LEFT, iks+i, igr+j, Main.level2);
-					}
-					else if (i==Main.pencil_width-1&&j==0){
-						Main.replace_block(Block._PARKING_TOP_RIGHT, iks+i, igr+j, Main.level2);
-					}
-					else if (i==Main.pencil_width-1&&j==Main.pencil_height-1){
-						Main.replace_block(Block._PARKING_BOT_RIGHT, iks+i, igr+j, Main.level2);
-					}
-
-					else if (i==0|| i==Main.pencil_width-1){
-						Main.replace_block(Block._PARKING_BORDER_SIDE, iks+i, igr+j, Main.level2);
-					}
-					else if(j==0||j==Main.pencil_height-1){
-						Main.replace_block(Block._PARKING_BORDER_TOPBOT, iks+i, igr+j, Main.level2);
-					}
-					else if (!pTäht){
-						pTäht=true;
-						Main.replace_block(Block._PARKING_P, iks+i, igr+j, Main.level2);
-					}
-					else{
-						Main.replace_block(Block._PARKING_FILLED_BLUE, iks+i, igr+j, Main.level2);
-					}
-
-
-					}
-				}
-			
-			
-			
-//			if(this.getFill()==Plokk.textures[49]){
-//				this.setFill(Plokk.textures[48]);
-//			}
-//			else{
-//				this.setFill(Plokk.textures[49]);
-//			}
+			if(this.getFill()==Block.textures[49]){
+				this.setFill(Block.textures[48]);
+			}
+			else{
+				this.setFill(Block.textures[49]);
+			}
 			this.isBusy=false;
 	        if (!this.orders_comm.isEmpty()){
 				String k = this.orders_comm.poll();

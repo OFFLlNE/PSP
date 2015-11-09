@@ -1,6 +1,10 @@
 package application;
        
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileInputStream;
@@ -30,6 +34,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -44,7 +51,7 @@ class BlockButton extends ToggleButton{
 
 
 public class Main extends Application {
-	
+	static String[] arguments;
 	// default values
 	static int level_width = 240;
 	static int level_height = 100;
@@ -65,7 +72,8 @@ public class Main extends Application {
 	//LAIMIS END
 
 	public static Deque<Integer> l2 = new ArrayDeque<Integer>();
-
+	final static Deque<Integer[]> pastReplaces = new ArrayDeque<Integer[]>();
+	
 	static int currentTool = 0;
 	static GridPane level = new GridPane();
 	static GridPane level2 = new GridPane();
@@ -74,7 +82,18 @@ public class Main extends Application {
 
 	final static Label label_newUI_parkingSlots = new Label();
 	final static Label label_newUI_robotSlots = new Label();
+	
 
+    final static NumberTextField field_zoom = new NumberTextField();
+    final static NumberTextField pildiLaiusVäli = new NumberTextField();
+    final static NumberTextField pildiKõrgusVäli = new NumberTextField();
+    final static TextField field_image_file = new TextField();
+    final static TextField väli_pencil_width = new TextField();
+    final static TextField väli_pencil_height = new TextField();
+    final static Button button_refresh_image = new Button("Apply image");
+    final static Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
+
+    
 	static int number_of_parking_slots_1 = 0;
 	static int number_of_parking_slots_2 = 0;
 
@@ -290,7 +309,9 @@ public class Main extends Application {
 		}      
 	}
 	
-	public static void colorParking(int x, int y,GridPane lvl){
+
+
+	public static void colorParking(int x, int y, GridPane lvl){
 		boolean pTäht = false;
 
 		for(int i = 0; i< pencil_width; i++){
@@ -327,6 +348,55 @@ public class Main extends Application {
 			}
 		}
 	}
+    
+    public static void colorOccupied(int x, int y, GridPane lvl){
+        for(int i = 0; i< pencil_width; i++){
+            for(int j = 0; j< pencil_height; j++){                   
+                if (i==0&&j==0){
+                        replace_block(14, x+i, y+j, lvl);
+                }
+                else if (i==0&&j==pencil_height-1){
+                        replace_block(17, x+i, y+j, lvl);
+                }
+                else if (i==pencil_width-1&&j==0){
+                        replace_block(15, x+i, y+j, lvl);
+                }
+                else if (i==pencil_width-1&&j==pencil_height-1){
+                        replace_block(16, x+i, y+j, lvl);
+                }               
+                else if (i==1 && j == 0){
+                        replace_block(18, x+i, y+j, lvl);
+                }
+                else if (i==2 && j == 0){
+                    replace_block(19, x+i, y+j, lvl);
+                }
+                else if (i==3 && j == 0){
+                    replace_block(20, x+i, y+j, lvl);
+                }
+                else if (i==0 && j == 1){
+                    replace_block(21, x+i, y+j, lvl);
+                }
+                else if (i==pencil_width-1 && j == 1){
+                    replace_block(23, x+i, y+j, lvl);
+
+                }
+                else if (i==1 && j == pencil_height-1){
+                    replace_block(24, x+i, y+j, lvl);
+                }
+                else if (i==2 && j == pencil_height-1){
+                    replace_block(25, x+i, y+j, lvl);
+                }
+                else if (i==3 && j == pencil_height-1){
+                    replace_block(26, x+i, y+j, lvl);
+                }
+                else{
+                    replace_block(22, x+i, y+j, lvl);
+                }
+            }
+        }
+    }
+    
+
 	
     public static int getType(int x, int y){
     	return ((Block) Main.getNodeFromGridPane(Main.level2, x, y)).nr;
@@ -351,20 +421,23 @@ public class Main extends Application {
 
     	if (kasAsendada){
     		//System.out.println("värvida: " + a.x + ", " + a.y);
+    		
     		replace_block(tool, a.x, a.y, lvl);
+
+   
     	}
 
     	if (!kasAsendada){
-    		if (!W.getFill().equals(b) && W.nr == eelmine && W != null) { to_mark.push(W);};
-    		if (!S.getFill().equals(b) && S.nr == eelmine && S != null  ) {         to_mark.push(S);};
-    		if (!E.getFill().equals(b) && E.nr == eelmine && E != null  ) {         to_mark.push(E);};
-    		if (!N.getFill().equals(b) && N.nr == eelmine && N != null  ) {         to_mark.push(N);};
+    		if (!W.getFill().equals(b) && W.nr == eelmine && W.nr != 6) { to_mark.push(W);};
+    		if (!S.getFill().equals(b) && S.nr == eelmine && S.nr != 6  ) {         to_mark.push(S);};
+    		if (!E.getFill().equals(b) && E.nr == eelmine && E.nr != 6  ) {         to_mark.push(E);};
+    		if (!N.getFill().equals(b) && N.nr == eelmine && N.nr != 6  ) {         to_mark.push(N);};
     	}
     	else{
-    		if (W.nr != a.nr && W.nr == eelmine && W != null) { to_mark.push(W);};
-    		if (S.nr != a.nr  &&  S.nr == eelmine && S != null  ) {         to_mark.push(S);};
-    		if (E.nr != a.nr &&  E.nr == eelmine && E != null  ) {          to_mark.push(E);};
-    		if (N.nr != a.nr && N.nr == eelmine && N != null  ) {           to_mark.push(N);};
+    		if (W.nr != a.nr && W.nr == eelmine && W.nr != 6) { to_mark.push(W);};
+    		if (S.nr != a.nr  &&  S.nr == eelmine && S.nr != 6  ) {         to_mark.push(S);};
+    		if (E.nr != a.nr &&  E.nr == eelmine && E.nr != 6  ) {          to_mark.push(E);};
+    		if (N.nr != a.nr && N.nr == eelmine && N.nr != 6  ) {           to_mark.push(N);};
     	}
 
 
@@ -435,7 +508,9 @@ public class Main extends Application {
  
         public static void loadLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException, WrongFileException {
                 silt5.setText("Laen...");
-                RandomAccessFile r = new RandomAccessFile("levels/"+fail, "r");
+                RandomAccessFile r = new RandomAccessFile(""+fail, "r");
+
+                
                 mitmes--;
                 r.skipBytes(mitmes*1536);
                 for(int i = 1; i<=level_height; i++){
@@ -453,6 +528,19 @@ public class Main extends Application {
                         }
                         //System.out.println();
                 }
+
+                File r2 = new File(""+fail+".txt");
+                BufferedReader reader = new BufferedReader(new FileReader(r2));
+                String[] readed = reader.readLine().split("\\|");
+                //field_zoom.setText(readed[0]);
+                pildiLaiusVäli.setText(readed[1]);
+                pildiKõrgusVäli.setText(readed[2]);
+                field_image_file.setText(readed[3]);
+                väli_pencil_width.setText(readed[4]);
+                väli_pencil_height.setText(readed[5]);
+                button_refresh_image.fire();
+                nupp_pintsli_suurus_rakenda.fire();
+                reader.close();
                 r.close();
                
                 silt5.setText("Laetud! - " + df.format(System.currentTimeMillis() )  );
@@ -463,6 +551,8 @@ public class Main extends Application {
         public static void saveLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
                 silt5.setText("Salvestan...");
                 RandomAccessFile r = new RandomAccessFile("levels/"+fail, "rw");
+                File r2 = new File("levels/"+fail+".txt");
+                BufferedWriter writer = new BufferedWriter(new FileWriter(r2));
                 //mitmes--;
                 System.out.println("salvestan");
                 //r.skipBytes(mitmes*1536);
@@ -474,7 +564,20 @@ public class Main extends Application {
                         }
                         //System.out.println();
                 }
+                
+                writer.write(field_zoom.getText());
+                writer.write("|");
+                writer.write(pildiLaiusVäli.getText());
+                writer.write("|");
+                writer.write(pildiKõrgusVäli.getText());
+                writer.write("|");
+                writer.write(field_image_file.getText());
+                writer.write("|");
+                writer.write(väli_pencil_width.getText());
+                writer.write("|");
+                writer.write(väli_pencil_height.getText());
                 r.close();
+                writer.close();
                 silt5.setText("Salvestatud! - " + df.format(System.currentTimeMillis() )  );
         }
        
@@ -524,10 +627,19 @@ public class Main extends Application {
             }
            
     }       
-       
+        
+      
         public static void replace_block(int nr, int j, int i, GridPane lvl){
                 Block muudetav = (Block) getNodeFromGridPane(lvl, j, i);
-               
+                
+                if (lvl==level){
+                	Integer[] comm = new Integer[3];
+                	comm[0] = muudetav.nr;
+                    comm[1] = i;
+                    comm[2] = j;
+                	pastReplaces.push(comm);
+                }
+                
                 if (nr == 1){
                         if (lvl == level){
                                 number_of_parking_slots_1++;
@@ -549,6 +661,7 @@ public class Main extends Application {
                         muudetav.muuda(nr);
                
                 }
+
                 updateParkingLabels();
                 //number_of_parking_slots_Silt.setText("Parkimiskohti joonistusel: " + number_of_parking_slots_1 + ", parkimiskohti robotparklas: " + number_of_parking_slots_2 + "");
                
@@ -575,10 +688,10 @@ public class Main extends Application {
                
                 for (int i = 1; i<27; i++){
                 		legal_blocks.add(i);
-                        Block.textures[i] = new ImagePattern(new Image(new FileInputStream(new File(i + ".png"))));
+                        Block.textures[i] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + i + ".png"))));
                 }
-                Block.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("r2.png")))); 
-                Block.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("r.png")))); 
+                Block.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r2.png")))); 
+                Block.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r.png")))); 
                 //System.out.println("Done!");
         }
        
@@ -736,7 +849,6 @@ public class Main extends Application {
 
             Label label_block_size = new Label("Zoom: ");
             Button button_block_size_apply = new Button("Set");
-            final NumberTextField field_zoom = new NumberTextField();
            
             GridPane gridPane_infolabels = new GridPane();
             
@@ -759,13 +871,9 @@ public class Main extends Application {
             GridPane image_resize_dialog_gridpane = new GridPane();
 
             Label label_bgimage_x = new Label("Width: ");
-            final NumberTextField pildiLaiusVäli = new NumberTextField();
             Label label_bgimage_y = new Label("Height: ");
-            final NumberTextField pildiKõrgusVäli = new NumberTextField();
             Label pildifailSilt = new Label("Filename: ");
-            final TextField field_image_file = new TextField();
             final Button button_reset_image_size = new Button("Reset size");
-            final Button button_refresh_image = new Button("Apply image");
                
             image_resize_dialog_gridpane.add(label_bgimage_x, 1, 0);
             image_resize_dialog_gridpane.add(pildiLaiusVäli, 2, 0);
@@ -958,9 +1066,6 @@ public class Main extends Application {
            
             
             
-            final TextField väli_pencil_width = new TextField();
-            final TextField väli_pencil_height = new TextField();
-            final Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
             
             väli_pencil_width.setText(pencil_width + "");
             väli_pencil_height.setText(pencil_height + "");
@@ -1218,11 +1323,25 @@ public class Main extends Application {
 
                                     	Algorithm gg = new Algorithm();
                                     	gg.run();
-                                            //(new Thread(gg)).start();
-                                            
+                                        //(new Thread(gg)).start();
+                                         
+                                    	try{
+                                    	// inform user of test results
+                                    	int actual = Integer.parseInt(label_newUI_robotSlots.getText().split(" ")[label_newUI_robotSlots.getText().split(" ").length-1]);
+                                        System.out.println(
+                                        		"\n\nGenerated parking spots\n"
+                                        		+ "Expected: " + arguments[1] + 
+                                        		", Actual: "+ actual);
+                                        if (actual != Integer.parseInt(arguments[1])){
+                                        	System.out.println("\n!!! Expected does not match actual.\n");
+                                        }
+                                        
+                                    	}catch (Exception erind_minor){
+                                    	}
+                                    	
                                         }
                                     catch (Exception erind) {
-                                        System.out.println(erind + " - algorithm error");
+                                    		System.out.println(erind + " - Algorithm error.");
                                     }
                                     stage2.show();
                                 }
@@ -1249,6 +1368,18 @@ public class Main extends Application {
                         }
                     );
            
+            
+            scene.getAccelerators().put(
+            		new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_ANY), 
+            		  new Runnable() {
+            		@Override public void run() {
+            			Integer[] comm = pastReplaces.pop();
+            			replace_block(comm[0],comm[2],comm[1], level);
+
+            		}
+            		  }
+            		);
+            
            // second window
             final ScrollPane scrollable2 = new ScrollPane();
             scrollable2.setHbarPolicy(ScrollBarPolicy.ALWAYS);
@@ -1418,6 +1549,15 @@ public class Main extends Application {
             button_newUI_draw_wall.fire();
             
             //field_level_filename.setText("levels.dat");
+            try{
+            	field_level_filename.setText(arguments[0]);
+            }
+            catch (Exception e){
+            	System.out.println("no filename launch argument");
+            }
+            
+            
+            
             //field_image_file.setText("parkla.png");
             
             button_refresh_image.fire();
@@ -1431,10 +1571,20 @@ public class Main extends Application {
             //button_refresh_image.fire();
             // show main window
             primaryStage.show();
+            try{
+            	System.out.println("Expecting "+arguments[1]+" parking spots.");
+            	button_newUI_run.fire();
+            	primaryStage.close();
+            	stage2.close();
+            }
+            catch (Exception e){
+            	System.out.println("no second launch argument");
+            }
+            
         }
        
         public static void main(String[] args) {
-               
+               arguments=args;
                 launch(args);
         }
 }

@@ -2,6 +2,8 @@ package application;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javafx.scene.layout.GridPane;
+
 public class Algorithm implements Runnable{
 
 	static int gateX = 0;
@@ -241,54 +243,16 @@ public class Algorithm implements Runnable{
     private static void createParkingSpot(int x, int y){
     	//ParkingSpotManager.add(new ParkingSpot(x, y, null, null, null, null));
     	//colorOccupied(x, y);
-    	Main.colorParking(x, y, Main.level2);
+    	colorParking(x, y);
     }
     
+    
+	public static void colorParking(int x, int y){
+        Main.colorParking(x, y, Main.level2);
+	}
+    
     public static void colorOccupied(int x, int y){
-        for(int i = 0; i< pl; i++){
-            for(int j = 0; j< pk; j++){                   
-                if (i==0&&j==0){
-                        Main.replace_block(14, x+i, y+j, Main.level2);
-                }
-                else if (i==0&&j==pk-1){
-                        Main.replace_block(17, x+i, y+j, Main.level2);
-                }
-                else if (i==pl-1&&j==0){
-                        Main.replace_block(15, x+i, y+j, Main.level2);
-                }
-                else if (i==pl-1&&j==pk-1){
-                        Main.replace_block(16, x+i, y+j, Main.level2);
-                }               
-                else if (i==1 && j == 0){
-                        Main.replace_block(18, x+i, y+j, Main.level2);
-                }
-                else if (i==2 && j == 0){
-                    Main.replace_block(19, x+i, y+j, Main.level2);
-                }
-                else if (i==3 && j == 0){
-                    Main.replace_block(20, x+i, y+j, Main.level2);
-                }
-                else if (i==0 && j == 1){
-                    Main.replace_block(21, x+i, y+j, Main.level2);
-                }
-                else if (i==pl-1 && j == 1){
-                    Main.replace_block(23, x+i, y+j, Main.level2);
-
-                }
-                else if (i==1 && j == pk-1){
-                    Main.replace_block(24, x+i, y+j, Main.level2);
-                }
-                else if (i==2 && j == pk-1){
-                    Main.replace_block(25, x+i, y+j, Main.level2);
-                }
-                else if (i==3 && j == pk-1){
-                    Main.replace_block(26, x+i, y+j, Main.level2);
-                }
-                else{
-                    Main.replace_block(22, x+i, y+j, Main.level2);
-                }
-            }
-        }
+        Main.colorOccupied(x, y, Main.level2);
     }
     
     /**
@@ -325,6 +289,9 @@ public class Algorithm implements Runnable{
                 if(Main.getType(x+i, y+j) != type){
                         return false;
                 }
+//                if(!Block.isMoveable( Main.getType(x+i, y+j) )){
+//                	return false;
+//                }
             }
         }
         return true;

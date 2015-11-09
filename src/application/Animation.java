@@ -4,7 +4,7 @@ public class Animation implements Runnable {
 
 	protected static int numberOfCarsIn = 10;
 	protected static int numberOfCarsOut = 10;
-	protected static int botSpeed = 200;
+	protected static int botSpeed = 200; //1,6
 	protected static int numberOfbots = 4;
 	
 	public static boolean paused = false;
@@ -20,7 +20,7 @@ public class Animation implements Runnable {
 		while(kas){
 		
 			if (!r2.isBusy){
-				Algorithm.colorOccupied((int)r2.get_X(), (int)r2.get_Y());
+				Algorithm.colorOccupied(r2.getRobotX(), r2.getRobotY());
 				kas=false;
 			}
 			System.out.println("tere");
@@ -43,7 +43,7 @@ public class Animation implements Runnable {
 		while(kas){
 		
 			if (!r2.isBusy){
-				Algorithm.colorOccupied((int)r2.get_X(), (int)r2.get_Y());
+				Algorithm.colorOccupied((int)r2.getRobotX(), (int)r2.getRobotY());
 				kas=false;
 			}
 			System.out.println("tere");
