@@ -1,10 +1,6 @@
 package application;
        
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileInputStream;
@@ -20,6 +16,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.scene.Group;
@@ -34,9 +31,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -72,7 +66,6 @@ public class Main extends Application {
 	//LAIMIS END
 
 	public static Deque<Integer> l2 = new ArrayDeque<Integer>();
-	final static Deque<Integer[]> pastReplaces = new ArrayDeque<Integer[]>();
 	
 	static int currentTool = 0;
 	static GridPane level = new GridPane();
@@ -92,7 +85,10 @@ public class Main extends Application {
     final static TextField väli_pencil_height = new TextField();
     final static Button button_refresh_image = new Button("Apply image");
     final static Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
-
+    final static Label label_newUI_image = new Label("");
+    final static Label label_newUI_dat = new Label("");
+    
+    static String last_path = "";
     
 	static int number_of_parking_slots_1 = 0;
 	static int number_of_parking_slots_2 = 0;
@@ -130,11 +126,15 @@ public class Main extends Application {
 		}
 
 		public void handle(MouseEvent me) {
-			if (me.getEventType()==MouseEvent.MOUSE_ENTERED)
-			{
-
-				if (button_tool_fill.isSelected()){
-					//mark_neighbours(a, Color.AQUA, a.nr, false, 0, level);
+			if (me.getEventType()==MouseEvent.MOUSE_ENTERED){
+				if (button_tool_fill.isSelected() && a.nr!=6){
+					try{
+					mark_neighbours(a, Color.AQUA, a.nr, false, 0, level);
+				}
+				catch(StackOverflowError st){
+					System.out.println(st + " You might want add VM argument -Xss1500m");
+					to_mark.clear();
+				}
 				}
 				if (a.nr != 6){
 					a.setFill(Color.AQUAMARINE);
@@ -148,24 +148,51 @@ public class Main extends Application {
 
 
 				if (button_tool_custom_brush_size.isSelected()){
-
-
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
 							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
 						}
 					}
+				}
 
-				}      
+				if (button_tool_laimis.isSelected()){
+					if (started == true && a.nr != 6){
+						int x_side;
+						int y_side;
+						if (a.x>ui.x){
+							x_side = -1;
+						}
+						else{
+							x_side=1;
+						}
 
+						if (a.y>ui.y){
+							y_side = -1;
+						}
+						else{
+							y_side=1;
+						}
+						for(int i = 0; i< Math.abs(ui.x - a.x)+1; i++){
+							for(int j = 0; j< Math.abs(ui.y - a.y)+1; j++){
+								((Block)getNodeFromGridPane(level, a.x+ (i*x_side) , a.y+  (j*y_side ) )).setFill(Color.AQUA);
+							}
+						}
+					}
+				}   
 			}
 
-			else if (me.getEventType()==MouseEvent.MOUSE_CLICKED)
-			{
-
-
+			else if (me.getEventType()==MouseEvent.MOUSE_CLICKED){
 				if (button_tool_fill.isSelected()){
-					mark_neighbours(a, Color.AQUA, a.nr, true, currentTool, level);
+					if(!(a.nr==currentTool)){
+						try{
+						mark_neighbours(a, Color.AQUA, a.nr, true, currentTool, level);
+						}
+						catch(StackOverflowError st){
+							System.out.println(st + " You might want add VM argument -Xss1500m");
+							to_mark.clear();
+						}
+					}
+			
 				}
 
 				//if (a.x != 0 & a.y != 0 & a.x != 59 & a.y != 23 ) {
@@ -173,42 +200,52 @@ public class Main extends Application {
 				//      };
 
 
-				if (button_tool_laimis.isSelected()){
-
-					//LAIMIS               
+				if (button_tool_laimis.isSelected()){     
 					if (started == false){
 						started = true;
 						ui = a;
 					}
 					else{
 						started = false;
-
+						int x_side;
+						int y_side;
+						if (a.x>ui.x){
+							x_side = -1;
+						}
+						else{
+							x_side=1;
+						}
+						if (a.y>ui.y){
+							y_side = -1;
+						}
+						else{
+							y_side=1;
+						}
 						for(int i = 0; i< Math.abs(ui.x - a.x)+1; i++){
 							for(int j = 0; j< Math.abs(ui.y - a.y)+1; j++){
-
-
-								replace_block(currentTool, a.x+i, a.y+j, level);
-								//Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
-
+								replace_block(currentTool, a.x+ (i*x_side)   , a.y+ (j*y_side)    , level);
 							}
 						}
-
 					}
-					//LAIMIS END
 
 				}      
 
 				if (button_tool_custom_brush_size.isSelected()){
-					
+
 					boolean pTäht = false;
 
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
 
-
 							if (currentTool == Block._PARKING_P){
 								if (i==0&&j==0){
-									replace_block(Block._PARKING_TOP_LEFT, a.x+i, a.y+j, level);
+
+									if(pencil_width < 3 || pencil_height < 3){
+										replace_block(Block._PARKING_P, a.x, a.y, level);
+									}
+									else{
+										replace_block(Block._PARKING_TOP_LEFT, a.x+i, a.y+j, level);
+									}
 								}
 								else if (i==0&&j==pencil_height-1){
 									replace_block(Block._PARKING_BOT_LEFT, a.x+i, a.y+j, level);
@@ -229,46 +266,42 @@ public class Main extends Application {
 								else if (!pTäht){
 									pTäht=true;
 									replace_block(Block._PARKING_P, a.x+i, a.y+j, level);
+									
 								}
 								else{
 									replace_block(Block._PARKING_FILLED_BLUE, a.x+i, a.y+j, level);
 								}
-
-
 							}
 							else{
-
 								replace_block(currentTool, a.x+i, a.y+j, level);
 								//Parkla weJustGeneratedThisRectangle = new Parkla(xalgus, xlopp, yalgus, ylopp)
 							}
 						}
 					}
-					
-					
 
 				}      
-
-
-
 			}
 
-
+			//MOUSE_EXITED
 			else {
 				mouseX = a.x;
 				mouseY = a.y;      
 
 				if (button_tool_fill.isSelected() && a.nr != 6){
+					try{
 					mark_neighbours(a, a.see, a.nr, false, 0, level);
 				}
+				catch(StackOverflowError st){
+					System.out.println(st + " You might want add VM argument -Xss1500m");
+					to_mark.clear();
+				}
+				}
 
-				//märgiTeatud(a, a.see, a.nr, 4);
 				if (a.nr != 6){
 					a.setFill(a.see);
 				}
 
 				if (button_tool_custom_brush_size.isSelected()){
-
-
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
 							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
@@ -276,7 +309,29 @@ public class Main extends Application {
 					}
 				}
 
-
+				if (button_tool_laimis.isSelected()){
+					if (started == true && a.nr != 6){
+						int x_side;
+						int y_side;
+						if (a.x>ui.x){
+							x_side = -1;
+						}
+						else{
+							x_side=1;
+						}
+						if (a.y>ui.y){
+							y_side = -1;
+						}
+						else{
+							y_side=1;
+						}
+						for(int i = 0; i< Math.abs(ui.x - a.x)+1; i++){
+							for(int j = 0; j< Math.abs(ui.y - a.y)+1; j++){
+								((Block)getNodeFromGridPane(level, a.x+ (i*x_side) , a.y+  (j*y_side ) )).setFill(((Block)getNodeFromGridPane(level, a.x+(i*x_side), a.y+(j*y_side ))).see);
+							}
+						}
+					}
+				}   
 			}
 		}      
 	}
@@ -290,21 +345,17 @@ public class Main extends Application {
 		}
 
 		public void handle(MouseEvent me) {
-			if (me.getEventType()==MouseEvent.MOUSE_DRAGGED)
-			{
+			if (me.getEventType()==MouseEvent.MOUSE_DRAGGED){
 
 				//if ((int)me.getX()/Plokk.suurus != 0 & (int)me.getY()/Plokk.suurus != 0 & (int)me.getX()/Plokk.suurus != 59 & (int)me.getY()/Plokk.suurus != 23 ) {
 
 				//((Plokk) getNodeFromGridPane(level, (int)me.getX()/Plokk.suurus, (int)me.getY()/Plokk.suurus)  ).muuda(currentTool);
-				if (!button_tool_custom_brush_size.isSelected()){
+				if (button_tool_place.isSelected()){
 					replace_block(currentTool, (int)me.getX()/Block.suurus, (int)me.getY()/Block.suurus, level);
 				}
 				//};
 
 				label_mouse_cordinates.setText("(" + (int)me.getX()/Block.suurus + ", " + (int)me.getY()/Block.suurus + ")");
-
-
-
 			}
 		}      
 	}
@@ -318,7 +369,15 @@ public class Main extends Application {
 			for(int j = 0; j< pencil_height; j++){
 
 					if (i==0&&j==0){
-						replace_block(Block._PARKING_TOP_LEFT, x+i, y+j, lvl);
+						
+						if(pencil_width < 3 || pencil_height < 3){
+							replace_block(Block._PARKING_P, x, y, lvl);
+						}
+						else{
+							replace_block(Block._PARKING_TOP_LEFT, x+i, y+j, lvl);
+						}
+						
+						//replace_block(Block._PARKING_TOP_LEFT, x+i, y+j, lvl);
 					}
 					else if (i==0&&j==pencil_height-1){
 						replace_block(Block._PARKING_BOT_LEFT, x+i, y+j, lvl);
@@ -402,54 +461,48 @@ public class Main extends Application {
     	return ((Block) Main.getNodeFromGridPane(Main.level2, x, y)).nr;
     }
     // FILL ALGORITHM
+    
     public static Deque<Block> to_mark = new ArrayDeque<Block>();
-    public static void mark_neighbours(Block a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl){
-    	if (a.nr != eelmine){
-
-    		//System.out.println("ok!");
+    
+    public static void mark_neighbours(Block a, Paint b, int eelmine, boolean kasAsendada, int tool, GridPane lvl) throws StackOverflowError{
+    	if (a==null){
+    		return;
     	}
-
-
+    	
     	Block W = neighbourW(a.x, a.y, lvl);
     	Block S = neighbourS(a.x, a.y, lvl);
     	Block E = neighbourE(a.x, a.y, lvl);
     	Block N = neighbourN(a.x, a.y, lvl);
 
-    	if (a.nr != 6){
+    	if (kasAsendada){
+    		replace_block(tool, a.x, a.y, lvl);
+    	}
+    	else{
     		a.setFill(b);
     	}
 
-    	if (kasAsendada){
-    		//System.out.println("värvida: " + a.x + ", " + a.y);
-    		
-    		replace_block(tool, a.x, a.y, lvl);
-
-   
-    	}
-
     	if (!kasAsendada){
-    		if (!W.getFill().equals(b) && W.nr == eelmine && W.nr != 6) { to_mark.push(W);};
-    		if (!S.getFill().equals(b) && S.nr == eelmine && S.nr != 6  ) {         to_mark.push(S);};
-    		if (!E.getFill().equals(b) && E.nr == eelmine && E.nr != 6  ) {         to_mark.push(E);};
-    		if (!N.getFill().equals(b) && N.nr == eelmine && N.nr != 6  ) {         to_mark.push(N);};
+    		if (W != null && !W.getFill().equals(b) && W.nr == eelmine     ) { to_mark.push(W);};
+    		if (S != null && !S.getFill().equals(b) && S.nr == eelmine    ) {         to_mark.push(S);};
+    		if (E != null && !E.getFill().equals(b) && E.nr == eelmine    ) {         to_mark.push(E);};
+    		if (N != null && !N.getFill().equals(b) && N.nr == eelmine   ) {         to_mark.push(N);};
     	}
     	else{
-    		if (W.nr != a.nr && W.nr == eelmine && W.nr != 6) { to_mark.push(W);};
-    		if (S.nr != a.nr  &&  S.nr == eelmine && S.nr != 6  ) {         to_mark.push(S);};
-    		if (E.nr != a.nr &&  E.nr == eelmine && E.nr != 6  ) {          to_mark.push(E);};
-    		if (N.nr != a.nr && N.nr == eelmine && N.nr != 6  ) {           to_mark.push(N);};
+    		//asendamine
+    		if (W!=null && W.nr == eelmine  ) { to_mark.push(W);};
+    		if (S!=null && S.nr == eelmine   ) {         to_mark.push(S);};
+    		if (E!=null && E.nr == eelmine  ) {          to_mark.push(E);};
+    		if (N!=null && N.nr == eelmine    ) {           to_mark.push(N);};
     	}
 
-
-
-
-    	try{ 
+    	//System.out.println(to_mark.getLast().nr);
+    	try{
     		mark_neighbours(to_mark.pop(), b, eelmine, kasAsendada, tool, lvl);
     	}
-
     	catch(Exception e){
-    		//new Alert(Alert.AlertType.ERROR, "Tere", ButtonType.OK);
-    		//System.out.println(e);
+    		if(e instanceof java.util.NoSuchElementException){
+    			return;
+    		}
     		to_mark.clear();
     		return;
     	}
@@ -460,102 +513,170 @@ public class Main extends Application {
    
    
     public static Block neighbourS(int x, int y, GridPane lvl){
-        return (Block)getNodeFromGridPane(lvl, x, y+1);
-       
+    	if (x>1 && x<level_width && y > 0 && y<Main.level_height){
+    		return (Block)getNodeFromGridPane(lvl, x, y+1);
+    	}
+    	else{
+    		return null;
+    	}
     }
    
     public static Block neighbourW(int x, int y, GridPane lvl){
+    	if (x>1 && x<level_width && y > 0 && y<Main.level_height){
         return (Block)getNodeFromGridPane(lvl, x+1, y);
+    	}
+    	else{
+    		return null;
+    	}
        
     }
    
    
     public static Block neighbourE(int x, int y, GridPane lvl){
+    	if (x>1 && x<level_width && y > 0 && y<Main.level_height){
         return (Block)getNodeFromGridPane(lvl, x-1, y);
+    	}
+    	else{
+    		return null;
+    	}
        
     }
    
     public static Block neighbourN(int x, int y, GridPane lvl){
+    	if (x>1 && x<level_width && y > 0 && y<Main.level_height){
         return (Block)getNodeFromGridPane(lvl, x, y-1);
+    	}
+    	else{
+    		return null;
+    	}
        
     }
    
  
    
     public static Block getNodeFromGridPane(GridPane gridPane, int col, int row) {
-        //long a = System.currentTimeMillis();
     	if (gridPane==level){
     		return plokid[col][row];
     	}else{
              return plokid2[col][row]; 
-//        for (Node node : gridPane.getChildren()) {
-//            if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
-//              //System.out.println(System.currentTimeMillis()-a + "\n");
-//                return node;
-//            }
-//             
-//
-//        }
-//        
-//     
-//        
-//        
-//        return null;
     	}
        
     }
    
  
-        public static void loadLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException, WrongFileException {
-                silt5.setText("Laen...");
-                RandomAccessFile r = new RandomAccessFile(""+fail, "r");
+    public static void loadLevel_IO(File fail) throws  FileNotFoundException, IOException, ClassNotFoundException, WrongFileException {
+    	silt5.setText("Laen...");
+    	RandomAccessFile r = new RandomAccessFile(fail, "r");
 
-                
-                mitmes--;
-                r.skipBytes(mitmes*1536);
-                for(int i = 1; i<=level_height; i++){
-                        for(int j = 1; j<=level_width; j++){
-                        		
-                                int a = r.read();
-                                if (legal_blocks.contains(a)){
-                                //System.out.println("("+ i + ", " + j + ") - " + a);
-                                	l2.add(a);
-                                }
-                                else{
-                                	r.close();
-                                	throw new WrongFileException();
-                                }
-                        }
-                        //System.out.println();
-                }
 
-                File r2 = new File(""+fail+".txt");
-                BufferedReader reader = new BufferedReader(new FileReader(r2));
-                String[] readed = reader.readLine().split("\\|");
-                //field_zoom.setText(readed[0]);
-                pildiLaiusVäli.setText(readed[1]);
-                pildiKõrgusVäli.setText(readed[2]);
-                field_image_file.setText(readed[3]);
-                väli_pencil_width.setText(readed[4]);
-                väli_pencil_height.setText(readed[5]);
-                button_refresh_image.fire();
-                nupp_pintsli_suurus_rakenda.fire();
-                reader.close();
-                r.close();
-               
-                silt5.setText("Laetud! - " + df.format(System.currentTimeMillis() )  );
+
+    	for(int i = 1; i<=level_height; i++){
+    		for(int j = 1; j<=level_width; j++){
+
+    			int a = r.read();
+    			if (legal_blocks.contains(a)){
+    				//System.out.println("("+ i + ", " + j + ") - " + a);
+    				l2.add(a);
+    			}
+    			else{
+    				//System.out.println("Encountered illegal tile value in file.");
+    				r.close();
+    				throw new WrongFileException();
+    			}
+    		}
+    		//System.out.println();
+    	}
+
+    	field_zoom.setText(r.readInt() +"");
+    	pildiLaiusVäli.setText(r.readInt() +"");
+    	pildiKõrgusVäli.setText(r.readInt() +"");
+    	väli_pencil_width.setText(r.readInt() +"");
+    	väli_pencil_height.setText(r.readInt() +"");
+    	
+    	field_image_file.setText("");
+    	try{
+    		while(true){
+    			char imagePathPiece = r.readChar();
+    			field_image_file.setText(field_image_file.getText() + imagePathPiece ); 
+    		}
+    	}
+    	catch(Exception e){
+    		if (e instanceof java.io.EOFException){
+    			// This is normal. This is needed for program to stop trying to read file after it has ended.
+    		}
+    		else{
+    			System.out.println(e+" while determining image path");
+    		}
+    	}
+    	r.close();
+
+    	silt5.setText("Laetud! - " + df.format(System.currentTimeMillis() )  );
+    }
+
+       
+        public void loadLevel(File fail){
+			level.getChildren().removeAll(level.getChildren());
+			level2.getChildren().removeAll(level2.getChildren());
+			number_of_parking_slots_1 = 0;
+			number_of_parking_slots_2 = 0;
+
+			// read saved file into queue l2
+			try {
+				loadLevel_IO( fail  );
+				//button_refresh_image.fire();
+			}
+			// file not found likely, fill queue with generic level instead
+			catch (Exception erind) {
+				
+				//System.out.println("faili pole, teen uue");
+
+				if (erind instanceof FileNotFoundException){
+					System.out.println(erind + " While loading level. Making blank unsaved file.");
+					silt5.setText("Blank unsaved file. - " + df.format(System.currentTimeMillis() )  );
+					makeGenericLevel();
+					
+					//System.out.println(erind);
+				}
+				else if (erind instanceof WrongFileException){
+					System.out.println(erind + " While loading level.");
+					silt5.setText("Not correctly structured file - " + df.format(System.currentTimeMillis() )  );
+					makeGenericLevel();
+				}
+				else if (erind instanceof java.io.EOFException){
+					System.out.println(erind + " File ends after level info.");
+					silt5.setText("Incomplete file. Likely made with older version. - " + df.format(System.currentTimeMillis() )  );
+				}
+				else{
+					System.out.println(erind + " While loading level.");
+					silt5.setText("While opening file: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
+					//makeGenericLevel();
+				}
+				
+			}
+			// draw level from queue
+			finally {
+				for(int i = 0; i<level_height; i++){
+					for(int j = 0; j<level_width; j++){
+						add_block(   l2.pop(), j, i, level  );         
+					}
+				}
+
+				last_path = fail.toString();
+				button_refresh_image.fire();
+				nupp_pintsli_suurus_rakenda.fire();
+
+			    label_newUI_dat.setText(last_path);
+
+			}
         }
+        
        
-       
-       
-        public static void saveLevel(int mitmes, String fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
+        public static void saveLevel(File fail) throws  FileNotFoundException, IOException, ClassNotFoundException {
                 silt5.setText("Salvestan...");
-                RandomAccessFile r = new RandomAccessFile("levels/"+fail, "rw");
-                File r2 = new File("levels/"+fail+".txt");
-                BufferedWriter writer = new BufferedWriter(new FileWriter(r2));
-                //mitmes--;
+                RandomAccessFile r = new RandomAccessFile(fail, "rw");
+                
                 System.out.println("salvestan");
-                //r.skipBytes(mitmes*1536);
+                
                 for(int i = 0; i<=level_height-1; i++){
                         for(int j = 0; j<=level_width-1; j++){
                         	//System.out.println("("+ i + ", " + j + ") - " + a);
@@ -565,19 +686,21 @@ public class Main extends Application {
                         //System.out.println();
                 }
                 
-                writer.write(field_zoom.getText());
-                writer.write("|");
-                writer.write(pildiLaiusVäli.getText());
-                writer.write("|");
-                writer.write(pildiKõrgusVäli.getText());
-                writer.write("|");
-                writer.write(field_image_file.getText());
-                writer.write("|");
-                writer.write(väli_pencil_width.getText());
-                writer.write("|");
-                writer.write(väli_pencil_height.getText());
+                
+                r.writeInt(Integer.parseInt(field_zoom.getText()));
+                
+                r.writeInt(Integer.parseInt(pildiLaiusVäli.getText()));
+                r.writeInt(Integer.parseInt(pildiKõrgusVäli.getText()));
+                
+                r.writeInt(Integer.parseInt(väli_pencil_width.getText()));
+                r.writeInt(Integer.parseInt(väli_pencil_height.getText()));
+                
+                r.writeChars(field_image_file.getText());
+                
+                r.setLength(r.getFilePointer());
+                
                 r.close();
-                writer.close();
+                
                 silt5.setText("Salvestatud! - " + df.format(System.currentTimeMillis() )  );
         }
        
@@ -632,13 +755,6 @@ public class Main extends Application {
         public static void replace_block(int nr, int j, int i, GridPane lvl){
                 Block muudetav = (Block) getNodeFromGridPane(lvl, j, i);
                 
-                if (lvl==level){
-                	Integer[] comm = new Integer[3];
-                	comm[0] = muudetav.nr;
-                    comm[1] = i;
-                    comm[2] = j;
-                	pastReplaces.push(comm);
-                }
                 
                 if (nr == 1){
                         if (lvl == level){
@@ -735,15 +851,18 @@ public class Main extends Application {
 					add_block(   l2.pop(), j, i, level  );         
 				}
 			}
-			for(int i = 0; i<=level_height-1; i++){
-				for(int j = 0; j<=level_width-1; j++){
-					l2.add(((Block) getNodeFromGridPane(level2, j, i)).nr);
-				}
-			} 
-			level2.getChildren().removeAll(level2.getChildren());
-			for(int i = 0; i<level_height; i++){
-				for(int j = 0; j<level_width; j++){
-					add_block(   l2.pop(), j, i, level2  );         
+			
+			if(!level2.getChildren().isEmpty()){
+				for(int i = 0; i<=level_height-1; i++){
+					for(int j = 0; j<=level_width-1; j++){
+						l2.add(((Block) getNodeFromGridPane(level2, j, i)).nr);
+					}
+				} 
+				level2.getChildren().removeAll(level2.getChildren());
+				for(int i = 0; i<level_height; i++){
+					for(int j = 0; j<level_width; j++){
+						add_block(   l2.pop(), j, i, level2  );         
+					}
 				}
 			}
         }
@@ -752,97 +871,57 @@ public class Main extends Application {
         public void start(final Stage primaryStage) throws  FileNotFoundException, IOException, ClassNotFoundException {
                
             readTextures();
-               
-//            Runtime runtime = Runtime.getRuntime();
-//            NumberFormat format = NumberFormat.getInstance();
-//            StringBuilder sb = new StringBuilder();
-//            long maxMemory = runtime.maxMemory();
-//            long allocatedMemory = runtime.totalMemory();
-//            long freeMemory = runtime.freeMemory();
-//            sb.append("\nfree memory: " + format.format(freeMemory / 1024) + "\n");
-//            sb.append("allocated memory: " + format.format(allocatedMemory / 1024) + "\n");
-//            sb.append("max memory: " + format.format(maxMemory / 1024) + "\n");
-//            sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024) + "\n\n");
-//            System.out.println(sb);
              
             GridPane root = new GridPane();
             final Scene scene = new Scene(root,1600,900);
             primaryStage.setTitle("PitStop Parking");
             primaryStage.setScene(scene);
             
-            
-            // load dialog
-            GridPane ruudustik = new GridPane();
-            Label silt = new Label("Level: ");
-            final Button nupp = new Button("Open");
-            final TextField field_level_filename = new TextField();
-            
-            
-            // vv OLD UI
-            final TextField väli_selected_block_tool = new TextField();
-            
-            GridPane oldUI_block_toolbar_gridpane = new GridPane();
-
-            ToggleGroup BlockButtons = new ToggleGroup();
-
-            // block selection toolbar for old UI
-            for (int i = 0; i<14; i++){
-
-            	if (i < 41 ){
-            		final BlockButton temp = new BlockButton();
-            		temp.i = i;
-            		//oldUI_block_toolbar_gridpane.getChildren().add(temp);
-            		//StackPane.setMargin(temp, new Insets(0, 0, 0, 0));
-
-            		oldUI_block_toolbar_gridpane.add(temp, i, 0);
-
-            		Rectangle temp2 = new Rectangle();
-
-            		temp2.setX(0);
-            		temp2.setY(0);
-            		temp2.setWidth(16
-            				//Plokk.suurus
-            				);
-            		temp2.setHeight(16
-            				//Plokk.suurus
-            				);
-            		temp2.setFill(Block.textures[i]);
-
-
-            		temp.setGraphic(temp2);
-
-            		temp.setToggleGroup(BlockButtons);
-
-            		temp.setOnAction(
-            				new EventHandler<ActionEvent>() {
-            					@Override public void handle(ActionEvent e) {
-            						currentTool = temp.i;
-            						väli_selected_block_tool.setText( temp.i + "" );
-            					}      
-            				}
-            				);
-            		if (i==0){
-            			temp.fire();
-            		}
-
-            		//Label rl = new Label(i + "");
-            		//rl.setMouseTransparent(true);
-            		//oldUI_block_toolbar_gridpane.add(rl, i, 0);
-
-            	}
-
-            }
-            
-            // programmi toolbar
-            ruudustik.add(silt, 1, 0);
-            ruudustik.add(field_level_filename, 2, 0);
-            //ruudustik.add(väli, 3, 0);
-            ruudustik.add(nupp, 4, 0);
-            // programmi toolbar
-            
-
-            
-            oldUI_block_toolbar_gridpane.add(väli_selected_block_tool, 20, 0);
+//            // vv OLD UI
+//            final TextField väli_selected_block_tool = new TextField();
+//            
+//            GridPane oldUI_block_toolbar_gridpane = new GridPane();
+//
+//            ToggleGroup BlockButtons = new ToggleGroup();
+//
+//            // block selection toolbar for old UI
+//            for (int i = 0; i<14; i++){
+//            	if (i < 41 ){
+//            		final BlockButton temp = new BlockButton();
+//            		temp.i = i;
+//            		//oldUI_block_toolbar_gridpane.getChildren().add(temp);
+//            		//StackPane.setMargin(temp, new Insets(0, 0, 0, 0));
+//            		oldUI_block_toolbar_gridpane.add(temp, i, 0);
+//            		Rectangle temp2 = new Rectangle();
+//
+//            		temp2.setX(0);
+//            		temp2.setY(0);
+//            		temp2.setWidth(16 );
+//            		temp2.setHeight(16           				);
+//            		temp2.setFill(Block.textures[i]);
+//            		temp.setGraphic(temp2);
+//            		temp.setToggleGroup(BlockButtons);
+//            		temp.setOnAction(
+//            				new EventHandler<ActionEvent>() {
+//            					@Override public void handle(ActionEvent e) {
+//            						currentTool = temp.i;
+//            						väli_selected_block_tool.setText( temp.i + "" );
+//            					}      
+//            				}
+//            				);
+//            		if (i==0){
+//            			temp.fire();
+//            		}
+//            		//Label rl = new Label(i + "");
+//            		//rl.setMouseTransparent(true);
+//            		//oldUI_block_toolbar_gridpane.add(rl, i, 0);
+//
+//            	}
+//
+//            }
+//            
+//            
+//            oldUI_block_toolbar_gridpane.add(väli_selected_block_tool, 20, 0);
             
             // ^^ OLD UI
              
@@ -903,7 +982,22 @@ public class Main extends Application {
             modes.add(button_tool_laimis, 18, 0);
             modes.add(button_tool_custom_brush_size, 19, 0);
  
+            // file operation dialogs
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("DAT", "*.dat")
+                );
+            fileChooser.setTitle("Point to .dat file");
+            fileChooser.setInitialDirectory(new File("levels/"));
 
+            final FileChooser imageChooser = new FileChooser();
+            imageChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("All Images", "*.*"),
+                    new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+                    new FileChooser.ExtensionFilter("PNG", "*.png")
+                );
+            imageChooser.setTitle("Point to image");
+            
             
             // new UI
 
@@ -917,8 +1011,13 @@ public class Main extends Application {
             button_newUI_choose_dat.setOnAction(
                     new EventHandler<ActionEvent>() {
                         @Override public void handle(ActionEvent e) {
-                            stage3.show();
-                            stage3.setWidth(248);
+                        	
+
+                            File dat_file = fileChooser.showOpenDialog(primaryStage);
+                        	if (dat_file!=null){
+                        		loadLevel( dat_file  );
+                        	}
+            				
                         }      
                 }
             );
@@ -967,7 +1066,7 @@ public class Main extends Application {
             					
             				}
             				currentTool = 5;
-            				väli_selected_block_tool.setText(5+ "" );
+            				//väli_selected_block_tool.setText(5+ "" );
             			}      
             		}
             		);
@@ -979,7 +1078,7 @@ public class Main extends Application {
             					
             				}
             				currentTool = 1;
-            				väli_selected_block_tool.setText(1+ "" );
+            				//väli_selected_block_tool.setText(1+ "" );
             			}      
             		}
             		); 
@@ -992,7 +1091,7 @@ public class Main extends Application {
             					
             				}
             				currentTool = 4;
-            				väli_selected_block_tool.setText(4+ "" );
+            				//väli_selected_block_tool.setText(4+ "" );
             			}      
             		}
             		);
@@ -1005,7 +1104,7 @@ public class Main extends Application {
             					
             				}
             				currentTool = 2;
-            				väli_selected_block_tool.setText(2+ "" );
+            				//väli_selected_block_tool.setText(2+ "" );
             			}      
             		}
             		);   
@@ -1014,12 +1113,10 @@ public class Main extends Application {
             final Button button_newUI_resize_p = new Button("Resize P");
             newUI.add(button_newUI_resize_p,1,1);
             
-            final Button button_newUI_save_dat = new Button("Save dat");
             
             final Button button_newUI_run = new Button("Make robot lot");
             
-            //final Label label_newUI_image = new Label("Chosen image");
-            //final Label label_newUI_dat = new Label("Chosen dat");
+
 
             
             
@@ -1036,7 +1133,16 @@ public class Main extends Application {
             button_newUI_choose_image.setOnAction(
                     new EventHandler<ActionEvent>() {
                         @Override public void handle(ActionEvent e) {
-                        	newUI_resize_image_dialog_stage.show();
+                        	//newUI_resize_image_dialog_stage.show();
+                        	
+
+                            File image_file = imageChooser.showOpenDialog(primaryStage);
+                        	if (image_file!=null){
+
+                        	    field_image_file.setText(image_file.toString());
+                        	    button_refresh_image.fire();
+                        	}
+                        	
                         }      
                 }
             );
@@ -1082,12 +1188,21 @@ public class Main extends Application {
                         }      
                 }
             );
-            
-            //newUI.add(label_newUI_image,1,2);
+
             newUI.add(modes,1,2);
             
-            //newUI.add(label_newUI_dat,1,3);
+            GridPane filelabels = new GridPane();
+
+            newUI.add(filelabels,1,3);
             
+            filelabels.add(label_newUI_image,1,0);
+            
+            filelabels.add(label_newUI_dat,0,0);
+            filelabels.setHgap(10);
+            filelabels.setVgap(4);
+            
+
+            final Button button_newUI_save_dat = new Button("Save dat");
             newUI.add(button_newUI_save_dat,2,0);
             newUI.add(button_newUI_run,2,1);
             newUI.add(label_newUI_parkingSlots,2,2);
@@ -1101,19 +1216,19 @@ public class Main extends Application {
             
             
  
-            // old UI window
-            GridPane oldRoot = new GridPane();
-            oldRoot.add(ruudustik, 0, 0);
-            oldRoot.add(oldUI_block_toolbar_gridpane, 0, 1);
-            
-            // vv
-
-            Scene scene3 = new Scene(oldRoot, 226, 26);
-            stage3.setTitle("Choose file");
-            stage3.setScene(scene3);
-            //^^
-            
-            // vv
+//            // old UI window
+//            GridPane oldRoot = new GridPane();
+//            //oldRoot.add(ruudustik, 0, 0);
+//            oldRoot.add(oldUI_block_toolbar_gridpane, 0, 1);
+//            
+//            // vv
+//
+//            Scene scene3 = new Scene(oldRoot);
+//            stage3.setTitle("Old UI");
+//            stage3.setScene(scene3);
+//            //^^
+//            
+//            // vv
             
             root.add(newUI, 0, 3);
 
@@ -1123,18 +1238,13 @@ public class Main extends Application {
             GridPane scrollableContent2 = new GridPane();
             scrollableContent.add(canvas, 0, 0);
             scrollableContent.add(level, 0, 0);
-            //root.add(canvas, 0, 4);
-            //root.add(canvas2, 1, 3);
 
             final ScrollPane scrollable = new ScrollPane();
             scrollable.setHbarPolicy(ScrollBarPolicy.ALWAYS);
             scrollable.setVbarPolicy(ScrollBarPolicy.ALWAYS);
             //scrollable.setContent(level);
             scrollable.setContent(scrollableContent);
-            //root.add(level, 0, 4);
             root.add(scrollable, 0, 4);
-            //root.add(level2, 1, 4);
-            //oldUI_block_toolbar_gridpane.add(label_mouse_cordinates, 21, 0);
 
 
             gridPane_infolabels.add(label_mouse_cordinates, 0, 0);
@@ -1144,67 +1254,7 @@ public class Main extends Application {
             //gridPane_infolabels.add(number_of_parking_slots_Silt, 0, 2);
  
                
-
-                
-            // open button
-            nupp.setOnAction(
-            		new EventHandler<ActionEvent>() {
-
-            			@Override public void handle(ActionEvent e) {
-
-            				level.getChildren().removeAll(level.getChildren());
-            				level2.getChildren().removeAll(level2.getChildren());
-            				number_of_parking_slots_1 = 0;
-            				number_of_parking_slots_2 = 0;
-
-            				// read saved file into queue l2
-            				try {
-            					loadLevel( 1, field_level_filename.getText()  );
-            					//button_refresh_image.fire();
-            				}
-            				// file not found likely, fill queue with generic level instead
-            				catch (Exception erind) {
-
-            					//System.out.println("faili pole, teen uue");
-
-            					if (erind instanceof FileNotFoundException){
-
-            						if (field_level_filename.getText().equals("")){
-            							silt5.setText("No file. - " + df.format(System.currentTimeMillis() )  );
-            							makeGenericLevel();
-            						}
-            						else{
-            							silt5.setText("File not found. So we crated it. - " + df.format(System.currentTimeMillis() )  );
-            							makeGenericLevel();
-            						}
-            						//System.out.println(erind);
-            					}
-            					else if (erind instanceof WrongFileException){
-            						silt5.setText("Not correctly structured file - " + df.format(System.currentTimeMillis() )  );
-            						makeGenericLevel();
-            						field_level_filename.setText("");
-            					}
-            					else{
-            						silt5.setText("While opening file: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
-            						makeGenericLevel();
-            					}
-            					
-            				}
-            				// draw level from queue
-            				finally {
-            					for(int i = 0; i<level_height; i++){
-            						for(int j = 0; j<level_width; j++){
-            							add_block(   l2.pop(), j, i, level  );         
-            						}
-            					}
-
-                                stage3.hide();
-            				}
-            			}
-            		}
-            		);
-           
-           
+  
  
             final Rectangle rectBG = new Rectangle(0,0,Block.suurus*level_width,Block.suurus*level_height);
             rectBG.setFill(Color.TRANSPARENT);
@@ -1220,12 +1270,15 @@ public class Main extends Application {
             				canvas.setWidth(uusSuurus*level_width);
             				rectBG.setX(uusSuurus*level_height);
             				rectBG.setY(uusSuurus*level_width);
+            				
             				int x =  Integer.parseInt( pildiLaiusVäli.getText() );
             				int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
             				pildiLaiusVäli.setText(((x/vanaSuurus)*Block.suurus)+"");
             				pildiKõrgusVäli.setText(((y/vanaSuurus)*Block.suurus)+"");
-
+            				Block.suurus = vanaSuurus;
             				button_refresh_image.fire();
+            				Block.suurus = uusSuurus;
+            				
             				reset();
 
             			}
@@ -1248,14 +1301,22 @@ public class Main extends Application {
 
             			@Override public void handle(ActionEvent e) {
             				try{           
+            					
+            					if (last_path.equals("") ){
+                					File dat_file = fileChooser.showSaveDialog(primaryStage);
+                					saveLevel( dat_file  );
+                					last_path = dat_file.toString();
 
-            					saveLevel( 1, field_level_filename.getText()  );
+                				    label_newUI_dat.setText(last_path);
+            					}
+            					else{
+            						saveLevel( new File(last_path)  );
+            					}
 
             				}
             				catch(Exception erind){
             					silt5.setText("salvestamine, tekkis: "+erind+ " - " + df.format(System.currentTimeMillis() )  );
-                                stage3.show();
-                                stage3.setWidth(200);
+
             				}
 
             			}
@@ -1263,23 +1324,45 @@ public class Main extends Application {
 
             		);
 
-           
+            nupp_pintsli_suurus_rakenda.setOnAction(
+                    new EventHandler<ActionEvent>() {
+                   
+                            @Override public void handle(ActionEvent e) {
+
+                                    pencil_width = Integer.parseInt(väli_pencil_width.getText());
+                                    pencil_height = Integer.parseInt(väli_pencil_height.getText());
+                                    button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);    
+                                    //button_newUI_resize_p.setText("Resize P" + "(" + pencil_width + "x" + pencil_height + ")"); 
+                    				newUI_resize_p_dialog_stage.hide();
+                            }
+                    }
+                );
+            
             button_refresh_image.setOnAction(
             		new EventHandler<ActionEvent>() {
 
             			@Override public void handle(ActionEvent e) {                                                          
 
-            				try{           
+            				try{
+            					
+            					gc.clearRect(Block.suurus,Block.suurus,pildiLaius,pildiKõrgus);
+            					gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
             					pildiLaius = Integer.parseInt(pildiLaiusVäli.getText());
             					pildiKõrgus = Integer.parseInt(pildiKõrgusVäli.getText());
-            					gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
             					gc.fillRect(Block.suurus,Block.suurus,pildiLaius,pildiKõrgus);
-            					//gc2.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
-            					//gc2.fillRect(Plokk.suurus,Plokk.suurus,pildiLaius,pildiKõrgus);
             				}
             				catch(Exception f){
-            					silt5.setText("While opening image: "+f+ " - " + df.format(System.currentTimeMillis() )  );
-            					System.out.println(f);
+            					if (f instanceof java.io.FileNotFoundException){
+            						System.out.println(f+ " While opening image. This is intended, when user wants a blank background or program is just now opened.");
+            					}
+            					else if (f instanceof java.lang.IllegalArgumentException){
+                					silt5.setText("Image not recognised - " + df.format(System.currentTimeMillis() )  );
+            						System.out.println(f+ " While opening image. Not an actual image file.");
+            					}
+            					else{
+            						//silt5.setText("While opening image: "+f+ " - " + df.format(System.currentTimeMillis() )  );
+            						System.out.println(f+ " While opening image. Unexpected exception.");
+            					}
             				}
             				finally{
             					newUI_resize_image_dialog_stage.hide();
@@ -1294,59 +1377,59 @@ public class Main extends Application {
  
            // Run algorithm
             button_newUI_run.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                                @Override public void handle(ActionEvent e) {
-                                        level2.getChildren().removeAll(level2.getChildren());
-                                        number_of_parking_slots_2 = 0;
-                                       
-                                    try {		
-                                    	for(int i = 0; i<Main.level_width; i++){
-                            			for(int j = 0; j<Main.level_height; j++){
+            		new EventHandler<ActionEvent>() {
+            			@Override public void handle(ActionEvent e) {
+            				level2.getChildren().removeAll(level2.getChildren());
+            				number_of_parking_slots_2 = 0;
+
+            				try {		
+            					for(int i = 0; i<Main.level_width; i++){
+            						for(int j = 0; j<Main.level_height; j++){
 
 
-                            				int uusP = ((Block) Main.getNodeFromGridPane(Main.level, i, j)).nr; // milline on vana plokk kohas i, j
-                            				//multiple entries - per 9 piece batches
+            							int uusP = ((Block) Main.getNodeFromGridPane(Main.level, i, j)).nr; // milline on vana plokk kohas i, j
+            							//multiple entries - per 9 piece batches
 
-                            				
-                            				// priit lisas; ignoreerib vanu parkimiskohti
-                            				if (uusP == 1 | uusP ==  7 | uusP ==  8 | uusP ==  9 | uusP ==  10 | uusP ==  11 | uusP ==  12 | uusP ==  13){
-                            					uusP = 2;
-                            				}
-                            				
-                            				Main.add_block2( uusP  , i, j  );      // lisab uude Main.levelisse samasse kohta samasuguse ploki
 
-                            			}
-                            		}
-                                    		// this is where laimis's code used to be that is now in class Algorithm
+            							// priit lisas; ignoreerib vanu parkimiskohti
+            							if (uusP == 1 | uusP ==  7 | uusP ==  8 | uusP ==  9 | uusP ==  10 | uusP ==  11 | uusP ==  12 | uusP ==  13){
+            								uusP = 2;
+            							}
 
-                                            //Algorithm.run();   
+            							Main.add_block2( uusP  , i, j  );      // lisab uude Main.levelisse samasse kohta samasuguse ploki
 
-                                    	Algorithm gg = new Algorithm();
-                                    	gg.run();
-                                        //(new Thread(gg)).start();
-                                         
-                                    	try{
-                                    	// inform user of test results
-                                    	int actual = Integer.parseInt(label_newUI_robotSlots.getText().split(" ")[label_newUI_robotSlots.getText().split(" ").length-1]);
-                                        System.out.println(
-                                        		"\n\nGenerated parking spots\n"
-                                        		+ "Expected: " + arguments[1] + 
-                                        		", Actual: "+ actual);
-                                        if (actual != Integer.parseInt(arguments[1])){
-                                        	System.out.println("\n!!! Expected does not match actual.\n");
-                                        }
-                                        
-                                    	}catch (Exception erind_minor){
-                                    	}
-                                    	
-                                        }
-                                    catch (Exception erind) {
-                                    		System.out.println(erind + " - Algorithm error.");
-                                    }
-                                    stage2.show();
-                                }
-                        }
-                    );
+            						}
+            					}
+            					// this is where laimis's code used to be that is now in class Algorithm
+
+            					//Algorithm.run();   
+
+            					Algorithm gg = new Algorithm();
+            					gg.run();
+            					//(new Thread(gg)).start();
+
+            					try{
+            						// inform user of test results
+            						int actual = Integer.parseInt(label_newUI_robotSlots.getText().split(" ")[label_newUI_robotSlots.getText().split(" ").length-1]);
+            						System.out.println(
+            								"\n\nGenerated parking spots\n"
+            										+ "Expected: " + arguments[1] + 
+            										", Actual: "+ actual);
+            						if (actual != Integer.parseInt(arguments[1])){
+            							System.out.println("\n!!! Expected does not match actual.\n");
+            						}
+
+            					}catch (Exception erind_minor){
+            					}
+
+            				}
+            				catch (Exception erind) {
+            					System.out.println(erind + " - While running algorithm.");
+            				}
+            				stage2.show();
+            			}
+            		}
+            		);
            
            
            
@@ -1354,31 +1437,19 @@ public class Main extends Application {
            
            
            
-            nupp_pintsli_suurus_rakenda.setOnAction(
-                        new EventHandler<ActionEvent>() {
-                       
-                                @Override public void handle(ActionEvent e) {
- 
-                                        pencil_width = Integer.parseInt(väli_pencil_width.getText());
-                                        pencil_height = Integer.parseInt(väli_pencil_height.getText());
-                                        button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);    
-                                        //button_newUI_resize_p.setText("Resize P" + "(" + pencil_width + "x" + pencil_height + ")"); 
-                        				newUI_resize_p_dialog_stage.hide();
-                                }
-                        }
-                    );
+
            
             
-            scene.getAccelerators().put(
-            		new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_ANY), 
-            		  new Runnable() {
-            		@Override public void run() {
-            			Integer[] comm = pastReplaces.pop();
-            			replace_block(comm[0],comm[2],comm[1], level);
-
-            		}
-            		  }
-            		);
+//            scene.getAccelerators().put(
+//            		new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_ANY), 
+//            		  new Runnable() {
+//            		@Override public void run() {
+//            			Integer[] comm = pastReplaces.pop();
+//            			replace_block(comm[0],comm[2],comm[1], level);
+//
+//            		}
+//            		  }
+//            		);
             
            // second window
             final ScrollPane scrollable2 = new ScrollPane();
@@ -1391,10 +1462,6 @@ public class Main extends Application {
             scrollableContent2.add(uus, 0, 0);
      
             scrollable2.setContent(scrollableContent2);
-     
-
-            
-
             
             //scrollable2.setContent(level2);
             //scrollable2.setContent(canvas2);
@@ -1466,7 +1533,7 @@ public class Main extends Application {
             
             stage2.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
-                    System.out.println("Stage2 is closing");
+                    System.out.println("Stage2 is closing. Thread should be killed soon.");
                     Animation.kill();
             		button_simUI_run.setText("Run");
                 }
@@ -1550,19 +1617,20 @@ public class Main extends Application {
             
             //field_level_filename.setText("levels.dat");
             try{
-            	field_level_filename.setText(arguments[0]);
+            	loadLevel(new File(arguments[0]));
             }
             catch (Exception e){
-            	System.out.println("no filename launch argument");
+            	loadLevel(new File(""));
+            	System.out.println("You have not specified filename launch argument.");
             }
             
             
             
             //field_image_file.setText("parkla.png");
             
-            button_refresh_image.fire();
+            //button_refresh_image.fire();
             
-            nupp.fire();
+            //nupp.fire();
 
             simUI_field_entering.setText(Animation.numberOfCarsIn+"");
             simUI_field_exiting.setText(Animation.numberOfCarsOut+"");
@@ -1570,6 +1638,7 @@ public class Main extends Application {
             simUI_field_robo_nr.setText(Animation.numberOfbots+"");
             //button_refresh_image.fire();
             // show main window
+            //stage3.show();
             primaryStage.show();
             try{
             	System.out.println("Expecting "+arguments[1]+" parking spots.");
@@ -1578,7 +1647,7 @@ public class Main extends Application {
             	stage2.close();
             }
             catch (Exception e){
-            	System.out.println("no second launch argument");
+            	System.out.println("You have not specified expected number parking spot value launch argument.");
             }
             
         }

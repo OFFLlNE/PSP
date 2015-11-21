@@ -1,1 +1,0 @@
-java -jar runnable_test_build_3.jar
