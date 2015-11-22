@@ -8,7 +8,6 @@ public class Animation implements Runnable {
 	protected static int numberOfbots = 4;
 	
 	public static boolean paused = false;
-	public static boolean stopped = false;
 	
 	public void run(){
 //		Bot r2 = Main.makeBot(20,1);
@@ -92,6 +91,8 @@ public class Animation implements Runnable {
 			paused = true;
 		}
 	}
+
+	public static boolean stopped = false;
 	public static void kill(){
 		System.out.println("killing thread");
 		stopped = true;

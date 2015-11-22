@@ -6,20 +6,26 @@ import java.util.Date;
 public class ParkingSpotManager {
 	public static ArrayList<ParkingSpot> parkingSpotsOrdered = new ArrayList<ParkingSpot>();
 	
+	/**
+	 * Adds an empty parking spot to our database
+	 * @param newSpot the parking spot
+	 */
 	public static void add(ParkingSpot newSpot){
+
 		ArrayList<ParkingSpot> oldOrdered = new ArrayList<ParkingSpot>(parkingSpotsOrdered);
 		parkingSpotsOrdered.clear();
 		boolean done = false;
 		
-		
 		for (ParkingSpot spot : oldOrdered) {			
-			if(newSpot.getDistance() <= spot.getDistance()){
+			if(newSpot.getDistance() <= spot.getDistance() && done == false){
 				parkingSpotsOrdered.add(newSpot);
+				done = true;
 			}
 			parkingSpotsOrdered.add(spot);
 		}
 		if(done == false){
 			parkingSpotsOrdered.add(newSpot);
+			done = true;
 		}
 	}
 	
@@ -31,9 +37,14 @@ public class ParkingSpotManager {
 			if(!parkingSpot.occupied()){
 				int curX = parkingSpot.getX();
 				int curY = parkingSpot.getY();
-				if(Algorithm.containsAll(curX+pl, curY, 2) && Algorithm.containsAll(curX, curY+pk, 2)
-						&& Algorithm.containsAll(curX-pl, curY, 2) && Algorithm.containsAll(curX, curY-pk, 2)
-						&& Algorithm.containsAll(curX-pl, curY-pk, 2) && Algorithm.containsAll(curX+pl, curY-pk, 2)){
+				if(Algorithm.isMovable(curX+pl, curY) 
+						&& Algorithm.isMovable(curX, curY+pk)
+						&& Algorithm.isMovable(curX-pl, curY) 
+						&& Algorithm.isMovable(curX, curY-pk)
+						&& Algorithm.isMovable(curX-pl, curY-pk)
+						&& Algorithm.isMovable(curX+pl, curY-pk)
+						&& Algorithm.isMovable(curX-pl, curY+pk)
+						&& Algorithm.isMovable(curX+pl, curY+pk)){
 					
 					return parkingSpot;
 				}				

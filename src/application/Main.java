@@ -88,6 +88,8 @@ public class Main extends Application {
     final static Label label_newUI_image = new Label("");
     final static Label label_newUI_dat = new Label("");
     
+	static Algorithm algorithm_thread = new Algorithm();
+    
     static String last_path = "";
     
 	static int number_of_parking_slots_1 = 0;
@@ -777,8 +779,9 @@ public class Main extends Application {
                         muudetav.muuda(nr);
                
                 }
-
-                updateParkingLabels();
+                if(lvl==level){
+                	updateParkingLabels();
+                }
                 //number_of_parking_slots_Silt.setText("Parkimiskohti joonistusel: " + number_of_parking_slots_1 + ", parkimiskohti robotparklas: " + number_of_parking_slots_2 + "");
                
         }
@@ -1404,8 +1407,9 @@ public class Main extends Application {
 
             					//Algorithm.run();   
 
-            					Algorithm gg = new Algorithm();
-            					gg.run();
+            					//gg.run();
+            					int roboSpaces = algorithm_thread.make();
+            					label_newUI_robotSlots.setText("Number of robot parking slots: " + roboSpaces);
             					//(new Thread(gg)).start();
 
             					try{
@@ -1511,18 +1515,21 @@ public class Main extends Application {
                             @Override public void handle(ActionEvent e) {
                             	if(button_simUI_run.getText().equals("Run")){
 
-                            		Animation.stopped = false;
-                            		button_simUI_run.setText("Play/Pause");
+                            		//Animation.stopped = false;
+                            		button_simUI_run.setText("Running");
                                 	//Simulation.run();
                             		
                                     //Platform.runLater(sim);
                             		
-                                    (new Thread(sim)).start();
+                                    //(new Thread(sim)).start();
+                					
+                					(new Thread(algorithm_thread)).start();
+                                    
                                     
                             	}
                             	else{
                             		//button_simUI_run.setText("Run");
-                            		Animation.pause();
+                            		//Animation.pause();
                             	}
                             }
                     }
@@ -1534,10 +1541,24 @@ public class Main extends Application {
             stage2.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
                     System.out.println("Stage2 is closing. Thread should be killed soon.");
-                    Animation.kill();
-            		button_simUI_run.setText("Run");
+                    //Animation.kill();
+                    Algorithm.kill();
+
+            		//button_simUI_run.setText("Run");
                 }
             }); 
+            
+            
+            primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                public void handle(WindowEvent we) {
+                    System.out.println("Stage2 is closing. Thread should be killed soon.");
+                    //Animation.kill();
+                    Algorithm.kill();
+                    System.exit(0);
+            		//button_simUI_run.setText("Run");
+                }
+            }); 
+            
             
             final Scene scene2 = new Scene(simUI_main,1600,900);
             stage2.setTitle("Robot simulation");

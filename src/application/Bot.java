@@ -38,7 +38,7 @@ public class Bot extends Rectangle{
 	
 	public void toggleColor(){
 		if (!this.isBusy){
-			System.out.println("[Understood] Respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Understood] Respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 
 			if(this.getFill()==Block.textures[49]){
@@ -71,7 +71,7 @@ public class Bot extends Rectangle{
 			
 		}
 		else{
-			System.out.println("[Queing] Not respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Queing] Not respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 		
 			this.orders_dist.add(0);
 			this.orders_comm.add("C");
@@ -83,7 +83,7 @@ public class Bot extends Rectangle{
    	public void moveRight(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        
@@ -135,7 +135,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 			
-			System.out.println("[Queing] Not moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Queing] Not moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("R");
 		}
@@ -144,7 +144,7 @@ public class Bot extends Rectangle{
    	public void moveLeft(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
@@ -193,7 +193,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Queing] Not moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 
 			this.orders_dist.add(distance);
 			this.orders_comm.add("L");
@@ -202,7 +202,7 @@ public class Bot extends Rectangle{
    	public void moveUp(int distance){
    		
 		if (!this.isBusy){
-			System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
@@ -252,7 +252,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Queing] Not moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("U");
 		}
@@ -262,7 +262,7 @@ public class Bot extends Rectangle{
 	public void moveDown(int distance){
    		
 		if (!this.isBusy ){
-			System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
 	        //
@@ -311,7 +311,7 @@ public class Bot extends Rectangle{
 		}
 		else{
 
-			System.out.println("[Queing] Not moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
+			//System.out.println("[Queing] Not moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.orders_dist.add(distance);
 			this.orders_comm.add("D");
 		}
