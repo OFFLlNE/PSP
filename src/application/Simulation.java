@@ -55,6 +55,7 @@ public class Simulation implements Runnable {
 					
 				}
 				else if (!ParkingSpotManager.parkingSpotsOccupied.isEmpty() && nrOfCarsOut>0){
+					System.out.println("retrieve");
 					boolean foundSuitable = false;
 					int runs = 0;
 					

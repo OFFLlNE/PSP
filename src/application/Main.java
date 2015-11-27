@@ -152,8 +152,9 @@ public class Main extends Application {
 				if (button_tool_custom_brush_size.isSelected()){
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
-							if( !(a.x+i > level_width)  && !(a.y+j> level_height) ){
-							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
+							
+							if( !(a.x+i >= level_width)  && !(a.y+j>= level_height) ){
+								((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
 							
 							}
 						}
@@ -309,7 +310,7 @@ public class Main extends Application {
 				if (button_tool_custom_brush_size.isSelected()){
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
-							if(!(a.x+i > level_width || a.y+j> level_height)){
+							if(!(a.x+i > level_width) || !(a.y+j> level_height)){
 								((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
 							}
 						}

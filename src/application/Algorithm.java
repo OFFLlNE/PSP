@@ -67,41 +67,6 @@ public class Algorithm implements Runnable{
 		
 		Bot r1 = Main.makeBot(gateX, gateY);
 		
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		tasks.add("a1,Audi R1,42424356");
-		
 		while(!stopped){
 			if(tasks.size() != 0){
 				String[] inf = tasks.get(0).split(",");
@@ -153,7 +118,6 @@ public class Algorithm implements Runnable{
 		int forwardY;
 		int leftX;
 		int leftY;
-		boolean try1 = false;
 		while(true){
 			beenTo2.put(curX+","+curY, "");
 			if(stepX == -pl){
@@ -245,14 +209,9 @@ public class Algorithm implements Runnable{
 					curX = curX+leftX;curY = curY+leftY;stepX = leftX;stepY = leftY;
 				}
 			}
-			else if(try1 == false){
-				try1 = true;
-				curX = curX+leftX;curY = curY+leftY;stepX = leftX;stepY = leftY;
-			}
 			else{
 				return null;
 			}
-			try1 = false;
 		}
 	}
 	
