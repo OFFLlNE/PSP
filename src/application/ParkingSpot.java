@@ -11,6 +11,7 @@ public class ParkingSpot {
 	
 	private int x;
 	private int y;
+	private int id;
 	private double distanceFromGate;
 	private String custodian;
 	private String model;
@@ -43,12 +44,26 @@ public class ParkingSpot {
 	public int getY(){
 		return this.y;
 	}
+	public int getID(){
+		return this.id;
+	}
 	
 	public ParkingSpot occupy(String custodian, String model, Date expirationDate){
 		this.custodian = custodian;
 		this.model = model;
 		this.ingestionDate = new Date(System.currentTimeMillis());
 		this.expirationDate = expirationDate;
+		this.id = ParkingSpotManager.getHighestID();
+		ParkingSpotManager.parkingSpotsOccupied.add(this);
+		return this;
+	}
+	
+	public ParkingSpot vacate(){
+		this.custodian = null;
+		this.model = null;
+		this.ingestionDate = null;
+		this.expirationDate = null;
+		this.id = 0;
 		return this;
 	}
 	

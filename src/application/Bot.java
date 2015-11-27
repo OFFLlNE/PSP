@@ -36,6 +36,15 @@ public class Bot extends Rectangle{
 		return (int)this.y/Block.suurus;
 	}
 	
+	public boolean hasCar(){
+		if(this.getFill()==Block.textures[48]){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
 	public void toggleColor(){
 		if (!this.isBusy){
 			//System.out.println("[Understood] Respraying. I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
@@ -96,7 +105,7 @@ public class Bot extends Rectangle{
 	        
 	        PathTransition pathTransition = new PathTransition();
 	        
-	        pathTransition.setDuration(Duration.millis(Animation.speedFormula(distance)));
+	        pathTransition.setDuration(Duration.millis(Simulation.speedFormula(distance)));
 	        pathTransition.setPath(path);
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
@@ -154,7 +163,7 @@ public class Bot extends Rectangle{
 	        //
 	        
 	        PathTransition pathTransition = new PathTransition();
-	        pathTransition.setDuration(Duration.millis(Animation.speedFormula(distance)));
+	        pathTransition.setDuration(Duration.millis(Simulation.speedFormula(distance)));
 	        pathTransition.setPath(path);
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
@@ -213,7 +222,7 @@ public class Bot extends Rectangle{
 	        
 	        PathTransition pathTransition = new PathTransition();
 	        
-	        pathTransition.setDuration(Duration.millis(Animation.speedFormula(distance)));
+	        pathTransition.setDuration(Duration.millis(Simulation.speedFormula(distance)));
 	        pathTransition.setPath(path);
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.NONE);
@@ -272,7 +281,7 @@ public class Bot extends Rectangle{
 	        //
 	        
 	        PathTransition pathTransition = new PathTransition();	        
-	        pathTransition.setDuration(Duration.millis(Animation.speedFormula(distance)));
+	        pathTransition.setDuration(Duration.millis(Simulation.speedFormula(distance)));
 	        pathTransition.setPath(path);
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.NONE);

@@ -77,12 +77,12 @@ public class Main extends Application {
 	final static Label label_newUI_robotSlots = new Label();
 	
 
-    final static NumberTextField field_zoom = new NumberTextField();
+    final static NumberTextField field_zoom = new NumberTextField(1,50);
     final static NumberTextField pildiLaiusVäli = new NumberTextField();
     final static NumberTextField pildiKõrgusVäli = new NumberTextField();
     final static TextField field_image_file = new TextField();
-    final static TextField väli_pencil_width = new TextField();
-    final static TextField väli_pencil_height = new TextField();
+    final static NumberTextField väli_pencil_width = new NumberTextField(1,10);
+    final static NumberTextField väli_pencil_height = new NumberTextField(1,10);
     final static Button button_refresh_image = new Button("Apply image");
     final static Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
     final static Label label_newUI_image = new Label("");
@@ -118,7 +118,7 @@ public class Main extends Application {
 	BlockButton button_tool_custom_brush_size;
 
 	static ArrayList<String> files = new ArrayList<String>();
-	static Animation sim = new Animation();
+	static Simulation sim = new Simulation();
 
 	class MouseEvent_Handler implements EventHandler<MouseEvent> {
 		Block a;
@@ -152,7 +152,10 @@ public class Main extends Application {
 				if (button_tool_custom_brush_size.isSelected()){
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
+							if( !(a.x+i > level_width)  && !(a.y+j> level_height) ){
 							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(Color.AQUA);
+							
+							}
 						}
 					}
 				}
@@ -232,7 +235,7 @@ public class Main extends Application {
 
 				}      
 
-				if (button_tool_custom_brush_size.isSelected()){
+				if (button_tool_custom_brush_size.isSelected()&&a.nr != 6){
 
 					boolean pTäht = false;
 
@@ -306,7 +309,9 @@ public class Main extends Application {
 				if (button_tool_custom_brush_size.isSelected()){
 					for(int i = 0; i< pencil_width; i++){
 						for(int j = 0; j< pencil_height; j++){
-							((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
+							if(!(a.x+i > level_width || a.y+j> level_height)){
+								((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).setFill(((Block)getNodeFromGridPane(level, a.x+i, a.y+j)).see);
+							}
 						}
 					}
 				}
@@ -688,7 +693,8 @@ public class Main extends Application {
                         //System.out.println();
                 }
                 
-                
+
+				validate_input();
                 r.writeInt(Integer.parseInt(field_zoom.getText()));
                 
                 r.writeInt(Integer.parseInt(pildiLaiusVäli.getText()));
@@ -707,6 +713,36 @@ public class Main extends Application {
         }
        
 
+        // to avoid making another listener. Called every time info is used.
+        public static void validate_input(){
+        	int newPw = Integer.parseInt(väli_pencil_width.getText());
+        	
+			if(newPw > väli_pencil_width.range_max){
+				väli_pencil_width.setText(väli_pencil_width.range_max+"");
+			}
+			else if(newPw < väli_pencil_width.range_min){
+				väli_pencil_width.setText(väli_pencil_width.range_min+"");            					
+			}        	
+			
+			int newPy = Integer.parseInt(väli_pencil_height.getText());
+        	
+			if(newPy > väli_pencil_height.range_max){
+				väli_pencil_height.setText(väli_pencil_height.range_max+"");
+			}
+			else if(newPy < väli_pencil_height.range_min){
+				väli_pencil_height.setText(väli_pencil_height.range_min+"");            					
+			}
+			
+        	
+        	int newZ = Integer.parseInt(field_zoom.getText());
+        	
+			if(newZ > field_zoom.range_max){
+				field_zoom.setText(field_zoom.range_max+"");
+			}
+			else if(newZ < field_zoom.range_min){
+				field_zoom.setText(field_zoom.range_min+"");            					
+			}
+        }
        
         public void add_block(int nr, int j, int i, GridPane lvl){
                 Block r = new Block(   nr, j, i  );
@@ -1064,7 +1100,11 @@ public class Main extends Application {
             button_newUI_draw_wall.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
-            				if (!button_tool_place.isSelected()){
+            	        	button_tool_place.setDisable(false);
+            	        	button_tool_fill.setDisable(false);
+            	        	button_tool_laimis.setDisable(false);
+            	        	button_tool_custom_brush_size.setDisable(false);
+            				if (currentTool == 1){
                 				button_tool_place.fire();
             					
             				}
@@ -1080,16 +1120,25 @@ public class Main extends Application {
                 				button_tool_custom_brush_size.fire();
             					
             				}
+//            	        	button_tool_place.setDisable(true);
+//            	        	button_tool_fill.setDisable(true);
+//            	        	button_tool_laimis.setDisable(true);
+//            	        	button_tool_custom_brush_size.setDisable(true);
             				currentTool = 1;
             				//väli_selected_block_tool.setText(1+ "" );
             			}      
             		}
             		); 
 
+        	
             button_newUI_gate.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
-            				if (!button_tool_place.isSelected()){
+            	        	button_tool_place.setDisable(false);
+            	        	button_tool_fill.setDisable(false);
+            	        	button_tool_laimis.setDisable(false);
+            	        	button_tool_custom_brush_size.setDisable(false);
+            				if (currentTool == 1){
                 				button_tool_place.fire();
             					
             				}
@@ -1102,7 +1151,11 @@ public class Main extends Application {
             button_newUI_clear.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
-            				if (!button_tool_place.isSelected()){
+            	        	button_tool_place.setDisable(false);
+            	        	button_tool_fill.setDisable(false);
+            	        	button_tool_laimis.setDisable(false);
+            	        	button_tool_custom_brush_size.setDisable(false);
+            				if (currentTool == 1){
                 				button_tool_place.fire();
             					
             				}
@@ -1266,7 +1319,10 @@ public class Main extends Application {
             button_block_size_apply.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
+            				validate_input();
             				int uusSuurus =  Integer.parseInt( field_zoom.getText() );
+
+            				
             				vanaSuurus = Block.suurus;
             				Block.suurus = uusSuurus;
             				canvas.setHeight(uusSuurus*level_height);
@@ -1332,6 +1388,7 @@ public class Main extends Application {
                    
                             @Override public void handle(ActionEvent e) {
 
+                				validate_input();
                                     pencil_width = Integer.parseInt(väli_pencil_width.getText());
                                     pencil_height = Integer.parseInt(väli_pencil_height.getText());
                                     button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);    
@@ -1485,7 +1542,7 @@ public class Main extends Application {
             
             Label simUI_field_explaination_robo_speed = new Label("\"Speed\" (lower=faster)");
             simUI.add(simUI_field_explaination_robo_speed, 2, 0);
-            final NumberTextField simUI_field_robo_speed = new NumberTextField();
+            final TextField simUI_field_robo_speed = new TextField();
             simUI.add(simUI_field_robo_speed, 2, 1);
 
             Label simUI_field_explaination_robo_nr = new Label("No. of robots");
@@ -1499,10 +1556,10 @@ public class Main extends Application {
                     new EventHandler<ActionEvent>() {
                    
                             @Override public void handle(ActionEvent e) {
-                            	Animation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
-                            	Animation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
-                            	Animation.botSpeed = Integer.parseInt(simUI_field_robo_speed.getText());
-                            	Animation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
+                            	Simulation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
+                            	Simulation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
+                            	Simulation.botSpeed = Double.parseDouble(simUI_field_robo_speed.getText());
+                            	Simulation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
                             }
                     }
                 );
@@ -1522,9 +1579,19 @@ public class Main extends Application {
                                     //Platform.runLater(sim);
                             		
                                     //(new Thread(sim)).start();
+
+                					(new Thread(sim)).start();
+                					
+                					try {
+                					Thread.sleep(100);
+                				} 
+                				catch (InterruptedException ee) {
+                					System.out.println(ee);
+                				}
+                					
                 					
                 					(new Thread(algorithm_thread)).start();
-                                    
+                				
                                     
                             	}
                             	else{
@@ -1543,7 +1610,7 @@ public class Main extends Application {
                     System.out.println("Stage2 is closing. Thread should be killed soon.");
                     //Animation.kill();
                     Algorithm.kill();
-
+            		button_simUI_run.setText("Run");
             		//button_simUI_run.setText("Run");
                 }
             }); 
@@ -1551,7 +1618,7 @@ public class Main extends Application {
             
             primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
-                    System.out.println("Stage2 is closing. Thread should be killed soon.");
+                    System.out.println("Primary stage is closing. Thread should be killed soon.");
                     //Animation.kill();
                     Algorithm.kill();
                     System.exit(0);
@@ -1645,18 +1712,20 @@ public class Main extends Application {
             	System.out.println("You have not specified filename launch argument.");
             }
             
-            
-            
+
             //field_image_file.setText("parkla.png");
             
             //button_refresh_image.fire();
             
             //nupp.fire();
-
-            simUI_field_entering.setText(Animation.numberOfCarsIn+"");
-            simUI_field_exiting.setText(Animation.numberOfCarsOut+"");
-            simUI_field_robo_speed.setText(Animation.botSpeed+"");
-            simUI_field_robo_nr.setText(Animation.numberOfbots+"");
+            
+//            button_newUI_run.fire();
+//            primaryStage.setIconified(true);
+            
+            simUI_field_entering.setText(Simulation.numberOfCarsIn+"");
+            simUI_field_exiting.setText(Simulation.numberOfCarsOut+"");
+            simUI_field_robo_speed.setText(Simulation.botSpeed+"");
+            simUI_field_robo_nr.setText(Simulation.numberOfbots+"");
             //button_refresh_image.fire();
             // show main window
             //stage3.show();

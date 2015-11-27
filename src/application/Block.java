@@ -23,14 +23,20 @@ public class Block extends Rectangle {
 	public static final int _PARKING_FILLED_BLUE = 13;
 
 	
-	public static final int _PARKING_P_ = 14;
-	public static final int _PARKING_TOP_LEFT_ = 15;
-	public static final int _PARKING_TOP_RIGHT_ = 16;
-	public static final int _PARKING_BOT_RIGHT_ = 17;
-	public static final int _PARKING_BOT_LEFT_ = 18;
-	public static final int _PARKING_BORDER_SIDE_ = 19;
-	public static final int _PARKING_BORDER_TOPBOT_ = 20;
-	public static final int _PARKING_FILLED_BLUE_ = 21;
+	public static final int _CAR_TOP_LEFT = 14;
+	public static final int _CAR_TOP_RIGHT = 15;
+	public static final int _CAR_BOT_RIGHT = 16;
+	public static final int _CAR_BOT_LEFT = 17;
+	public static final int _CAR_BORDER_TOP_1 = 18;
+	public static final int _CAR_BORDER_TOP_2 = 19;
+	public static final int _CAR_BORDER_TOP_3 = 20;
+
+	public static final int _CAR_BORDER_LEFT = 21;
+	public static final int _CAR_SOLID_BLACK = 22;
+	public static final int _CAR_BORDER_RIGHT = 23;
+	public static final int _CAR_BORDER_BOT_1 = 24;
+	public static final int _CAR_BORDER_BOT_2 = 25;
+	public static final int _CAR_BORDER_BOT_3 = 26;
 	
 	public static Paint[] textures = new Paint[50];
 	
@@ -78,12 +84,72 @@ public class Block extends Rectangle {
 	}
 	
 	
-	public static boolean isMoveable(int n){
+	public static boolean isMovable(int n){
 		if (
 				n ==  _PARKING_P||	
 				n ==  _NO_BLOCK||	
 				n ==  _ROBOT_ROAD||	
 				n ==  _ROBOT_GATEWAY||	
+				n ==  _PARKING_TOP_LEFT||
+				n ==  _PARKING_TOP_RIGHT||
+				n ==  _PARKING_BOT_RIGHT||
+				n ==  _PARKING_BOT_LEFT||
+				n ==  _PARKING_BORDER_SIDE||
+				n ==  _PARKING_BORDER_TOPBOT||
+				n ==  _PARKING_FILLED_BLUE
+				){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	
+	public static boolean isMovable(int x, int y){
+        for(int i = 0; i<Main.pencil_width; i++){
+            for(int j = 0; j<Main.pencil_height; j++){
+            	if(x+i < 0 || x+i > Main.level_width || y+j > Main.level_height || y+j < 0){
+            		return false;
+            	}
+                if(!isMovable( Main.getType(x+i, y+j) )){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+	
+	public static boolean isInvisible(int x, int y){
+        for(int i = 0; i<Main.pencil_width; i++){
+            for(int j = 0; j<Main.pencil_height; j++){
+            	if(x+i < 0 || x+i > Main.level_width || y+j > Main.level_height || y+j < 0){
+            		return false;
+            	}
+                if(!isInvisible( Main.getType(x+i, y+j) )){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+	
+
+	private static boolean isInvisible(int n){
+		if (
+				n ==  _NO_BLOCK	
+				){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	public static boolean isParking(int n){
+		//empty car slot
+		if (
+				n ==  _PARKING_P||	
 				n ==  _PARKING_TOP_LEFT||
 				n ==  _PARKING_TOP_RIGHT||
 				n ==  _PARKING_BOT_RIGHT||
@@ -100,7 +166,6 @@ public class Block extends Rectangle {
 		}
 	}
 	
-
 
 
 	@Override
