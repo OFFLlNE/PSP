@@ -92,6 +92,11 @@ public class Bot extends Rectangle{
    	public void moveRight(int distance){
    		
 		if (!this.isBusy){
+			if(Simulation.botSpeed==0){
+				this.isBusy=true;
+				this.x = this.x+distance*Block.suurus;
+				this.isBusy=false;
+			}else{
 			//System.out.println("[Understood] Moving RIGHT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
@@ -140,7 +145,7 @@ public class Bot extends Rectangle{
 	    	        }
 	            }
 	        });
-	        
+			}    
 		}
 		else{
 			
@@ -153,6 +158,11 @@ public class Bot extends Rectangle{
    	public void moveLeft(int distance){
    		
 		if (!this.isBusy){
+			if(Simulation.botSpeed==0){
+				this.isBusy=true;
+				this.x = this.x-distance*Block.suurus;
+				this.isBusy=false;
+			}else{
 			//System.out.println("[Understood] Moving LEFT by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
@@ -198,7 +208,7 @@ public class Bot extends Rectangle{
 	    	        }
 	            }
 	        });
-	        
+			} 
 		}
 		else{
 
@@ -211,6 +221,11 @@ public class Bot extends Rectangle{
    	public void moveUp(int distance){
    		
 		if (!this.isBusy){
+			if(Simulation.botSpeed==0){
+				this.isBusy=true;
+				this.y = this.y-distance*Block.suurus;
+				this.isBusy=false;
+			}else{
 			//System.out.println("[Understood] Moving UP by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
@@ -257,7 +272,7 @@ public class Bot extends Rectangle{
 	    	        }
 	            }
 	        });
-	        
+			} 
 		}
 		else{
 
@@ -271,6 +286,11 @@ public class Bot extends Rectangle{
 	public void moveDown(int distance){
    		
 		if (!this.isBusy ){
+			if(Simulation.botSpeed==0){
+				this.isBusy=true;
+				this.y = this.y+distance*Block.suurus;
+				this.isBusy=false;
+			}else{
 			//System.out.println("[Understood] Moving DOWN by "+distance+". I am here:  ("+this.x/Block.suurus + ", "+this.y/Block.suurus +")");
 			this.isBusy=true;
 	        Path path = new Path();
@@ -316,7 +336,7 @@ public class Bot extends Rectangle{
 	    	        }
 	            }
 	        });
-	        
+			} 
 		}
 		else{
 

@@ -1,15 +1,15 @@
 package application;
 
-import java.io.File;
-import java.util.ArrayList;
-
 public class Simulation implements Runnable {
 
+	protected static boolean oneHourInMsChanged = false;
+	protected static int oneHourInMsNew = 0;
+	
 	protected static int oneHourInMs = 12000;
 	
 	protected static int numberOfCarsIn = 10;
 	protected static int numberOfCarsOut = 10;
-	protected static double botSpeed = 0.1; //1,6
+	protected static double botSpeed = 30.0; //1,6
 	protected static int numberOfbots = 1;
 	
 	public static boolean paused = false;
@@ -20,8 +20,13 @@ public class Simulation implements Runnable {
 		
 		while(!Algorithm.stopped){
 
+			if(oneHourInMsChanged){
+				oneHourInMs = oneHourInMsNew;
+				oneHourInMsChanged=false;
+			}
 			System.out.println("-----------------------------------------------------------");
 			System.out.println("New hour has begun");
+			Main.updateHourLabel();
 			System.out.println("tasks: "+Algorithm.tasks);
 			System.out.println("-----------------------------------------------------------");
 			
@@ -48,20 +53,23 @@ public class Simulation implements Runnable {
 
 				//System.out.println(Algorithm.tasks);
 				int whichComm = (int)(Math.random() * ((2 - 1) + 1)) + 1;
-				//System.out.println(whichComm);
-				if (whichComm == 1 && nrOfCarsIn>0){
-					Algorithm.tasks.add("a1,Audi R1,42424356");
+				//System.out.println("rng:"+whichComm);
+				if(Algorithm.tasks.size()>100){
+					System.out.println("Too many commands.");
+				}
+				else if (whichComm == 1 && nrOfCarsIn>0){
+					Algorithm.tasks.add("a1,Audi R1,42424356,0");
 					nrOfCarsIn--;
 					
 				}
 				else if (!ParkingSpotManager.parkingSpotsOccupied.isEmpty() && nrOfCarsOut>0){
-					System.out.println("retrieve");
+					//System.out.println("retrieve");
 					boolean foundSuitable = false;
 					int runs = 0;
 					
 					while(!foundSuitable){
 						
-						int newRemoveComm = ParkingSpotManager.parkingSpotsOccupied.get((int)(Math.random() * ((ParkingSpotManager.parkingSpotsOccupied.size() - 1) + 1)) + 0).getID();
+						int newRemoveComm = (int) ParkingSpotManager.parkingSpotsOccupied.get((int)(Math.random() * ((ParkingSpotManager.parkingSpotsOccupied.size() - 1) + 1)) + 0).getID();
 						if(!Algorithm.tasks.contains(newRemoveComm+"")){
 							foundSuitable = true;
 							Algorithm.tasks.add(""+newRemoveComm);
@@ -80,7 +88,7 @@ public class Simulation implements Runnable {
 					nrOfCarsOut--;
 				}
 				else if(nrOfCarsIn>0){
-					Algorithm.tasks.add("a1,Audi R1,42424356");
+					Algorithm.tasks.add("a1,Audi R1,42424356,0");
 					nrOfCarsIn--;
 				}
 				else{
@@ -98,6 +106,7 @@ public class Simulation implements Runnable {
 				try {
 					//System.out.println("Waiting "+delays[j] + " before next car arrival/retrival.");
 					Thread.sleep(delays[j]);
+					Main.updateMinuteLabel((int)((delays[j]*60)/oneHourInMs));
 				} 
 				catch (Exception e) {
 					//e.printStackTrace();
@@ -114,9 +123,23 @@ public class Simulation implements Runnable {
 	
 	// will be changed. returns amount of time the movement is supposed to take. 
 	public static double speedFormula(int distance){
-		return distance*botSpeed;
+		return distance/(botSpeed/(oneHourInMs/3600));
+		
 	}
 	
+	public static boolean validateSpeed(double speed){
+    	if(1/(speed/(oneHourInMs/3600)) >0.1){
+    		return true;
+    	}
+    	else{
+        	return false;
+    	}
+	}
+	
+	public static double maxSpeed(){
+		double second = oneHourInMs/3600;
+    	return (1/0.1)*second;
+	}
 	
 	public static void pause(){
 		if (paused){

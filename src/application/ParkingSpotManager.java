@@ -31,49 +31,26 @@ public class ParkingSpotManager {
 			parkingSpotsOrdered.add(newSpot);
 			done = true;
 		}
-	}
-	
-	public static ParkingSpot getEmptyCheckers(){
-		int pl = Algorithm.pl;
-		int pk = Algorithm.pk;
-		for (int i = 0; i<parkingSpotsOrdered.size(); i++) {
-			ParkingSpot parkingSpot = parkingSpotsOrdered.get(i);
-			if(!parkingSpot.occupied()){
-				int curX = parkingSpot.getX();
-				int curY = parkingSpot.getY();
-				if(Algorithm.isMovable(curX+pl, curY) 
-						&& Algorithm.isMovable(curX, curY+pk)
-						&& Algorithm.isMovable(curX-pl, curY) 
-						&& Algorithm.isMovable(curX, curY-pk)
-						&& Algorithm.isMovable(curX-pl, curY-pk)
-						&& Algorithm.isMovable(curX+pl, curY-pk)
-						&& Algorithm.isMovable(curX-pl, curY+pk)
-						&& Algorithm.isMovable(curX+pl, curY+pk)){
-					
-					return parkingSpot;
-				}				
-			}
-		}
-		return null;
-	}
+	}	
 	
 	public static ParkingSpot retrieveOccupied(int n){
 		ParkingSpot parkingSpot;
 		for(int i = 0; i < parkingSpotsOccupied.size(); i++){
 			parkingSpot = parkingSpotsOccupied.get(i);
 			if(parkingSpot.getID() == n){
-				parkingSpotsOccupied.remove(i);
-				parkingSpot.vacate();
-				return parkingSpot;
+				ParkingSpot temp = new ParkingSpot(parkingSpot.getX(), parkingSpot.getY(), parkingSpot.getCustodian(), parkingSpot.getModel(), parkingSpot.getIngestionDate(), parkingSpot.getExpirationDate(), parkingSpot.getID());
+				return temp;
 			}
 		}
 		System.out.println("ERROR - something is really wrong");
 		return null;
 	}
 	
-	public static int getHighestID(){
+	
+	
+	public static long getHighestID(){
 		ParkingSpot parkingSpot;
-		int highest = 0;
+		long highest = 0;
 		for(int i = 0; i < parkingSpotsOccupied.size(); i++){
 			parkingSpot = parkingSpotsOccupied.get(i);
 			if(parkingSpot.getID() > highest){

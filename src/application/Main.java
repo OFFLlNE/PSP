@@ -49,6 +49,8 @@ public class Main extends Application {
 	// default values
 	static int level_width = 240;
 	static int level_height = 100;
+	//static int level_width = 60;
+	//static int level_height = 50;
 
 	static int pencil_width = 5;
 	static int pencil_height = 3;
@@ -78,15 +80,16 @@ public class Main extends Application {
 	
 
     final static NumberTextField field_zoom = new NumberTextField(1,50);
-    final static NumberTextField pildiLaiusVäli = new NumberTextField();
-    final static NumberTextField pildiKõrgusVäli = new NumberTextField();
+    final static NumberTextField field_image_width = new NumberTextField();
+    final static NumberTextField field_image_height = new NumberTextField();
     final static TextField field_image_file = new TextField();
-    final static NumberTextField väli_pencil_width = new NumberTextField(1,10);
-    final static NumberTextField väli_pencil_height = new NumberTextField(1,10);
+    final static NumberTextField field_pencil_width = new NumberTextField(1,10);
+    final static NumberTextField field_pencil_height = new NumberTextField(1,10);
     final static Button button_refresh_image = new Button("Apply image");
-    final static Button nupp_pintsli_suurus_rakenda = new Button("Yes!");
+    final static Button button_pencil_size_apply = new Button("Yes!");
     final static Label label_newUI_image = new Label("");
     final static Label label_newUI_dat = new Label("");
+    final static Label simUI_hour_indicator = new Label("");
     
 	static Algorithm algorithm_thread = new Algorithm();
     
@@ -98,15 +101,15 @@ public class Main extends Application {
 	static int mouseX;
 	static int mouseY;
 
-	static int pildiLaius = level_width*Block.suurus;
-	static int pildiKõrgus = level_height*Block.suurus;
+	static int image_width = level_width*Block.suurus;
+	static int image_height = level_height*Block.suurus;
 
 	static int vanaSuurus = Block.suurus;
 
     static Group uus = new Group();
 
-	static Block[][] plokid = new Block[level_width][level_height];
-	static Block[][] plokid2 = new Block[level_width][level_height];
+	static Block[][] blocks = new Block[level_width][level_height];
+	static Block[][] blocks2 = new Block[level_width][level_height];
 	
 	
 	
@@ -564,9 +567,15 @@ public class Main extends Application {
    
     public static Block getNodeFromGridPane(GridPane gridPane, int col, int row) {
     	if (gridPane==level){
-    		return plokid[col][row];
+    		return blocks[col][row];
     	}else{
-             return plokid2[col][row]; 
+    		 if(col < 0 || row < 0 || col >= level_width || row >= level_height){
+    			 System.out.println("out of bounds: "+ col + ", " + row);
+    			 return new Block(Block._CONCRETE,col,row);
+    		 }
+    		 else {
+                 return blocks2[col][row]; 
+    		 }
     	}
        
     }
@@ -596,10 +605,10 @@ public class Main extends Application {
     	}
 
     	field_zoom.setText(r.readInt() +"");
-    	pildiLaiusVäli.setText(r.readInt() +"");
-    	pildiKõrgusVäli.setText(r.readInt() +"");
-    	väli_pencil_width.setText(r.readInt() +"");
-    	väli_pencil_height.setText(r.readInt() +"");
+    	field_image_width.setText(r.readInt() +"");
+    	field_image_height.setText(r.readInt() +"");
+    	field_pencil_width.setText(r.readInt() +"");
+    	field_pencil_height.setText(r.readInt() +"");
     	
     	field_image_file.setText("");
     	try{
@@ -671,7 +680,7 @@ public class Main extends Application {
 
 				last_path = fail.toString();
 				button_refresh_image.fire();
-				nupp_pintsli_suurus_rakenda.fire();
+				button_pencil_size_apply.fire();
 
 			    label_newUI_dat.setText(last_path);
 
@@ -698,11 +707,11 @@ public class Main extends Application {
 				validate_input();
                 r.writeInt(Integer.parseInt(field_zoom.getText()));
                 
-                r.writeInt(Integer.parseInt(pildiLaiusVäli.getText()));
-                r.writeInt(Integer.parseInt(pildiKõrgusVäli.getText()));
+                r.writeInt(Integer.parseInt(field_image_width.getText()));
+                r.writeInt(Integer.parseInt(field_image_height.getText()));
                 
-                r.writeInt(Integer.parseInt(väli_pencil_width.getText()));
-                r.writeInt(Integer.parseInt(väli_pencil_height.getText()));
+                r.writeInt(Integer.parseInt(field_pencil_width.getText()));
+                r.writeInt(Integer.parseInt(field_pencil_height.getText()));
                 
                 r.writeChars(field_image_file.getText());
                 
@@ -716,22 +725,22 @@ public class Main extends Application {
 
         // to avoid making another listener. Called every time info is used.
         public static void validate_input(){
-        	int newPw = Integer.parseInt(väli_pencil_width.getText());
+        	int newPw = Integer.parseInt(field_pencil_width.getText());
         	
-			if(newPw > väli_pencil_width.range_max){
-				väli_pencil_width.setText(väli_pencil_width.range_max+"");
+			if(newPw > field_pencil_width.range_max){
+				field_pencil_width.setText(field_pencil_width.range_max+"");
 			}
-			else if(newPw < väli_pencil_width.range_min){
-				väli_pencil_width.setText(väli_pencil_width.range_min+"");            					
+			else if(newPw < field_pencil_width.range_min){
+				field_pencil_width.setText(field_pencil_width.range_min+"");            					
 			}        	
 			
-			int newPy = Integer.parseInt(väli_pencil_height.getText());
+			int newPy = Integer.parseInt(field_pencil_height.getText());
         	
-			if(newPy > väli_pencil_height.range_max){
-				väli_pencil_height.setText(väli_pencil_height.range_max+"");
+			if(newPy > field_pencil_height.range_max){
+				field_pencil_height.setText(field_pencil_height.range_max+"");
 			}
-			else if(newPy < väli_pencil_height.range_min){
-				väli_pencil_height.setText(väli_pencil_height.range_min+"");            					
+			else if(newPy < field_pencil_height.range_min){
+				field_pencil_height.setText(field_pencil_height.range_min+"");            					
 			}
 			
         	
@@ -743,6 +752,7 @@ public class Main extends Application {
 			else if(newZ < field_zoom.range_min){
 				field_zoom.setText(field_zoom.range_min+"");            					
 			}
+			
         }
        
         public void add_block(int nr, int j, int i, GridPane lvl){
@@ -757,10 +767,10 @@ public class Main extends Application {
  
                 lvl.add(r, j, i);
                 if (lvl == level){
-                	plokid[j][i] = r;
+                	blocks[j][i] = r;
                 }
                 else if(lvl == level2){
-                	plokid2[j][i] = r;
+                	blocks2[j][i] = r;
                 }
 //              Label rl = new Label(r.nr + "");
 //              rl.setMouseTransparent(true);
@@ -781,7 +791,7 @@ public class Main extends Application {
             Block r = new Block(   nr, j, i  );
            
             level2.add(r, j, i);
-            plokid2[j][i] = r;
+            blocks2[j][i] = r;
            
             if (nr == 1){
                 number_of_parking_slots_2++;
@@ -857,8 +867,22 @@ public class Main extends Application {
             label_newUI_parkingSlots.setText("Number of regular parking slots: " + number_of_parking_slots_1);
             label_newUI_robotSlots.setText("Number of robot parking slots: " + number_of_parking_slots_2 );
         }
-        
-        
+        public static void updateHourLabel(){
+        	Platform.runLater(new Runnable() {
+        		  @Override public void run() {
+        	        simUI_hour_indicator.setText((Integer.parseInt((simUI_hour_indicator.getText().split(":"))[0])+1)+":"+0);
+        		  }
+        		});
+			
+        }
+        public static void updateMinuteLabel(final int minutes){
+        	Platform.runLater(new Runnable() {
+        		  @Override public void run() {
+        	        simUI_hour_indicator.setText((simUI_hour_indicator.getText().split(":"))[0]+":"+(Integer.parseInt((simUI_hour_indicator.getText().split(":"))[1])+minutes));
+        		  }
+        		});
+			
+        }       
         public static void makeGenericLevel(){       
         	for(int i = 1; i<=level_height; i++){
         		for(int j = 1; j<=level_width; j++){
@@ -995,16 +1019,16 @@ public class Main extends Application {
             final Button button_reset_image_size = new Button("Reset size");
                
             image_resize_dialog_gridpane.add(label_bgimage_x, 1, 0);
-            image_resize_dialog_gridpane.add(pildiLaiusVäli, 2, 0);
+            image_resize_dialog_gridpane.add(field_image_width, 2, 0);
             image_resize_dialog_gridpane.add(label_bgimage_y, 3, 0);
-            image_resize_dialog_gridpane.add(pildiKõrgusVäli, 4, 0);
+            image_resize_dialog_gridpane.add(field_image_height, 4, 0);
             image_resize_dialog_gridpane.add(pildifailSilt, 5, 0);
             image_resize_dialog_gridpane.add(field_image_file, 6, 0);
             image_resize_dialog_gridpane.add(button_reset_image_size, 10, 0);
             image_resize_dialog_gridpane.add(button_refresh_image, 11, 0);
            
-            pildiLaiusVäli.setText(pildiLaius+"");
-            pildiKõrgusVäli.setText(pildiKõrgus+"");
+            field_image_width.setText(image_width+"");
+            field_image_height.setText(image_height+"");
             
 
  
@@ -1230,12 +1254,12 @@ public class Main extends Application {
             
             
             
-            väli_pencil_width.setText(pencil_width + "");
-            väli_pencil_height.setText(pencil_height + "");
+            field_pencil_width.setText(pencil_width + "");
+            field_pencil_height.setText(pencil_height + "");
             
-            newUI_resize_p_dialog_gridpane.add(väli_pencil_width, 1, 0);
-            newUI_resize_p_dialog_gridpane.add(väli_pencil_height, 2, 0);
-            newUI_resize_p_dialog_gridpane.add(nupp_pintsli_suurus_rakenda, 3, 0);
+            newUI_resize_p_dialog_gridpane.add(field_pencil_width, 1, 0);
+            newUI_resize_p_dialog_gridpane.add(field_pencil_height, 2, 0);
+            newUI_resize_p_dialog_gridpane.add(button_pencil_size_apply, 3, 0);
             
             //newUI_resize_p_dialog_stage.show();
             button_newUI_resize_p.setOnAction(
@@ -1331,10 +1355,10 @@ public class Main extends Application {
             				rectBG.setX(uusSuurus*level_height);
             				rectBG.setY(uusSuurus*level_width);
             				
-            				int x =  Integer.parseInt( pildiLaiusVäli.getText() );
-            				int y =  Integer.parseInt( pildiKõrgusVäli.getText() );
-            				pildiLaiusVäli.setText(((x/vanaSuurus)*Block.suurus)+"");
-            				pildiKõrgusVäli.setText(((y/vanaSuurus)*Block.suurus)+"");
+            				int x =  Integer.parseInt( field_image_width.getText() );
+            				int y =  Integer.parseInt( field_image_height.getText() );
+            				field_image_width.setText(((x/vanaSuurus)*Block.suurus)+"");
+            				field_image_height.setText(((y/vanaSuurus)*Block.suurus)+"");
             				Block.suurus = vanaSuurus;
             				button_refresh_image.fire();
             				Block.suurus = uusSuurus;
@@ -1348,8 +1372,8 @@ public class Main extends Application {
             button_reset_image_size.setOnAction(
             		new EventHandler<ActionEvent>() {
             			@Override public void handle(ActionEvent e) {
-            				pildiLaiusVäli.setText(level_width*Block.suurus+"");
-            				pildiKõrgusVäli.setText(level_height*Block.suurus+"");
+            				field_image_width.setText(level_width*Block.suurus+"");
+            				field_image_height.setText(level_height*Block.suurus+"");
             				
             			}      
             		}
@@ -1384,14 +1408,14 @@ public class Main extends Application {
 
             		);
 
-            nupp_pintsli_suurus_rakenda.setOnAction(
+            button_pencil_size_apply.setOnAction(
                     new EventHandler<ActionEvent>() {
                    
                             @Override public void handle(ActionEvent e) {
 
                 				validate_input();
-                                    pencil_width = Integer.parseInt(väli_pencil_width.getText());
-                                    pencil_height = Integer.parseInt(väli_pencil_height.getText());
+                                    pencil_width = Integer.parseInt(field_pencil_width.getText());
+                                    pencil_height = Integer.parseInt(field_pencil_height.getText());
                                     button_tool_custom_brush_size.setText(pencil_width + "x" + pencil_height);    
                                     //button_newUI_resize_p.setText("Resize P" + "(" + pencil_width + "x" + pencil_height + ")"); 
                     				newUI_resize_p_dialog_stage.hide();
@@ -1406,11 +1430,11 @@ public class Main extends Application {
 
             				try{
             					
-            					gc.clearRect(Block.suurus,Block.suurus,pildiLaius,pildiKõrgus);
+            					gc.clearRect(Block.suurus,Block.suurus,image_width,image_height);
             					gc.setFill(new ImagePattern(new Image(new FileInputStream(new File(field_image_file.getText())))));
-            					pildiLaius = Integer.parseInt(pildiLaiusVäli.getText());
-            					pildiKõrgus = Integer.parseInt(pildiKõrgusVäli.getText());
-            					gc.fillRect(Block.suurus,Block.suurus,pildiLaius,pildiKõrgus);
+            					image_width = Integer.parseInt(field_image_width.getText());
+            					image_height = Integer.parseInt(field_image_height.getText());
+            					gc.fillRect(Block.suurus,Block.suurus,image_width,image_height);
             				}
             				catch(Exception f){
             					if (f instanceof java.io.FileNotFoundException){
@@ -1541,7 +1565,7 @@ public class Main extends Application {
             final NumberTextField simUI_field_exiting = new NumberTextField();
             simUI.add(simUI_field_exiting, 1, 1);
             
-            Label simUI_field_explaination_robo_speed = new Label("\"Speed\" (lower=faster)");
+            Label simUI_field_explaination_robo_speed = new Label("Speed (tiles per second)");
             simUI.add(simUI_field_explaination_robo_speed, 2, 0);
             final TextField simUI_field_robo_speed = new TextField();
             simUI.add(simUI_field_robo_speed, 2, 1);
@@ -1550,23 +1574,41 @@ public class Main extends Application {
             simUI.add(simUI_field_explaination_robo_nr, 3, 0);
             final NumberTextField simUI_field_robo_nr = new NumberTextField();
             simUI.add(simUI_field_robo_nr, 3, 1);
+            simUI_field_robo_nr.setDisable(true);
+            
+            Label simUI_field_explaination_hour_length = new Label("One hour in ms");
+            simUI.add(simUI_field_explaination_hour_length, 4, 0);
+            final NumberTextField simUI_field_hour_length = new NumberTextField();
+            simUI.add(simUI_field_hour_length, 4, 1);
+            simUI_field_hour_length.setDisable(true);
             
             final Button button_simUI_apply = new Button("Apply changes");
-            simUI.add(button_simUI_apply, 4, 1);
+            simUI.add(button_simUI_apply, 5, 1);
             button_simUI_apply.setOnAction(
                     new EventHandler<ActionEvent>() {
                    
                             @Override public void handle(ActionEvent e) {
                             	Simulation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
                             	Simulation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
-                            	Simulation.botSpeed = Double.parseDouble(simUI_field_robo_speed.getText());
+                            	double speed = Double.parseDouble(simUI_field_robo_speed.getText());
+                            	
+                            	if(Simulation.validateSpeed(speed)){
+                            		Simulation.botSpeed = speed;
+                            	}
+                            	else{
+                            		Simulation.botSpeed = Simulation.maxSpeed();
+                            		simUI_field_robo_speed.setText(Simulation.maxSpeed()+"");
+                            	}
+                            	
                             	Simulation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
+                            	Simulation.oneHourInMsChanged = true;
+                            	Simulation.oneHourInMsNew = Integer.parseInt(simUI_field_hour_length.getText());
                             }
                     }
                 );
             ;
             final Button button_simUI_run = new Button("Run");
-            simUI.add(button_simUI_run, 5, 1);
+            simUI.add(button_simUI_run, 6, 1);
             button_simUI_run.setOnAction(
                     new EventHandler<ActionEvent>() {
                    
@@ -1605,6 +1647,9 @@ public class Main extends Application {
             ;
             simUI_main.add(simUI, 0, 0);
             simUI_main.add(scrollable2, 0, 1);
+            
+            simUI.add(simUI_hour_indicator, 7, 1);
+            simUI_hour_indicator.setText("0:00");
             
             stage2.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
@@ -1727,6 +1772,7 @@ public class Main extends Application {
             simUI_field_exiting.setText(Simulation.numberOfCarsOut+"");
             simUI_field_robo_speed.setText(Simulation.botSpeed+"");
             simUI_field_robo_nr.setText(Simulation.numberOfbots+"");
+            simUI_field_hour_length.setText(Simulation.oneHourInMs+"");
             //button_refresh_image.fire();
             // show main window
             //stage3.show();

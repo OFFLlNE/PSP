@@ -1,7 +1,5 @@
 package application;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
 public class NumberTextField extends TextField
@@ -48,9 +46,6 @@ public class NumberTextField extends TextField
     }
     
     
-    
-    private boolean validate_range(String text){
-    	return (Integer.parseInt(text) >range_min && Integer.parseInt(text) <range_max);
-    }
+   
     
 }

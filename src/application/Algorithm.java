@@ -10,9 +10,14 @@ public class Algorithm implements Runnable{
 	static int gateY = 0;
     static int pl = 0;
     static int pk = 0; 
+    static int a = 0;
     static Map <String, String> beenTo = new HashMap<String, String>();
+    static Map <String, String> beenToIm = new HashMap<String, String>();
     static ArrayList<String> tasks = new ArrayList<String>();    
 	static boolean stopped = false;
+	
+	static String closestPath = null;
+	static double closestDist = 0;
 	
 	static void kill(){
 		System.out.println("killing thread");
@@ -68,32 +73,36 @@ public class Algorithm implements Runnable{
 		Bot r1 = Main.makeBot(gateX, gateY);
 		
 		while(!stopped){
+			//System.out.println(tasks.size());
+			
 			if(tasks.size() != 0){
-				String[] inf = tasks.get(0).split(",");
-				
+				String[] inf = tasks.get(0).split(",");				
 				ParkingSpot parkingSpot;
+				
 				if(inf.length != 1){
-					if((parkingSpot = ParkingSpotManager.getEmptyCheckers()) != null){					
-						deliver(r1, parkingSpot, inf[0], inf[1], new Date(Integer.parseInt(inf[2])));
-						tasks.remove(0);
-					}
-					else if((parkingSpot = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY)) != null){
-						deliver(r1, parkingSpot, inf[0], inf[1], new Date(Integer.parseInt(inf[2])));
+					delivery(r1, inf[0], inf[1], new Date(Integer.parseInt(inf[2])), stepX, stepY);			
+				}
+				else{
+					parkingSpot = ParkingSpotManager.retrieveOccupied(Integer.parseInt(inf[0]));
+					beenTo.clear();
+					
+					Map <String, String> map = new HashMap<String, String>();
+					map.put(r1.getRobotX()+","+r1.getRobotY(), "");
+					if(pathfind(parkingSpot.getX(), parkingSpot.getY(), map, false) != null){
+						
+						retrieve(r1, parkingSpot);
 						tasks.remove(0);
 					}
 					else{
-						System.out.println("ERROR - add puzzle delivery here");
+						getDig(r1, parkingSpot, stepX, stepY);
+						tasks.remove(0);
 					}
-				}
-				else{
-					retrieve(r1, Integer.parseInt(inf[0]));
-					tasks.remove(0);
 				}
 			}
 			else{
 				try {
 					Thread.sleep(500);
-				} catch (InterruptedException e) {
+				} catch (InterruptedException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -101,17 +110,168 @@ public class Algorithm implements Runnable{
 		}
     }
 	
+	public static void delivery(Bot robot, String custodian, String model, Date expirationDate, int stepX, int stepY){
+		ParkingSpot parkingSpot;
+		if((parkingSpot = getEmptyCheckers()) != null){					
+			deliver(robot, parkingSpot, custodian, model, expirationDate);
+			tasks.remove(0);
+		}
+		else if((parkingSpot = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY)) != null){
+			deliver(robot, parkingSpot, custodian, model, expirationDate);
+			tasks.remove(0);
+		}
+		else{
+			System.out.println("Parking lot is full! Adding car to the priority queue");
+			
+			String t = tasks.get(0);
+			tasks.remove(0);						
+			boolean found = false;
+			boolean first = true;
+			for(int i = 0; i < tasks.size();i++){
+				if(first && tasks.get(i).split(",").length == 1){
+					first = false;
+				}
+				else if(first == false){
+					if(tasks.get(i).split(",").length != 1){
+						if(tasks.get(i).split(",")[3].equals("0")){
+							tasks.add(i, t);
+							found = true;
+							break;
+						}
+					}
+					
+				}
+			}
+			if(found == false){
+				tasks.add(t);
+			}
+		}
+	}
+	
+	public static String getDig(Bot b, ParkingSpot parkingSpot, int stepX, int stepY){
+		int tX = parkingSpot.getX();
+		int tY = parkingSpot.getY();
+		closestPath = null;
+		closestDist = 0;
+		
+		beenTo.clear();
+		Map <String, String> map = new HashMap<String, String>();
+		map.put(b.getRobotX()+","+b.getRobotY(), "");
+		pathfind(tX, tY, map, true);
+		if(closestPath == null){return null;}
+		String[] parts = closestPath.split(",,,");
+		int sX = Integer.parseInt(parts[parts.length-1].split(",")[0]);
+		int sY = Integer.parseInt(parts[parts.length-1].split(",")[1]);
+		
+		map = new HashMap<String, String>();
+		map.put(sX+","+sY, "");
+		String path = pathfindPuzzle(tX, tY, map);
+		if(path == null){
+			return null;
+		}
+		
+		parts = path.split(",,,");
+		for(int i = 2; i<parts.length-1;i++){
+			ParkingSpot parkingSpot2;
+			if((parkingSpot2 = getEmptyCheckers()) != null){		
+			}
+			else if((parkingSpot2 = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY)) != null){
+			}
+			else{return null;}
+			move(b, Integer.parseInt(parts[i].split(",")[0]), Integer.parseInt(parts[i].split(",")[1]),
+					parkingSpot2.getX(), parkingSpot2.getY());
+		}
+		retrieve(b, parkingSpot);
+		return "";
+	}
+	
+	private static void move(Bot robot, int sX, int sY, int tX, int tY){
+		goTo(robot, sX, sY);		
+		robot.toggleColor();
+		
+		ParkingSpot parkingSpot = ParkingSpotManager.getParking(sX, sY);
+		String c = parkingSpot.getCustodian();
+		String m = parkingSpot.getModel();
+		Date in = parkingSpot.getIngestionDate();
+		Date e = parkingSpot.getExpirationDate();
+		long id = parkingSpot.getID();
+		
+		parkingSpot.vacate();
+		colorParking(sX, sY);
+		goTo(robot, tX, tY);
+		robot.toggleColor();
+		ParkingSpotManager.getParking(tX, tY).occupy(c, m, in, e, id);
+		colorOccupied(tX, tY);
+	}
+	
+	public static String pathfindPuzzle(int tX, int tY, Map <String, String> curMap){
+		Map <String, String> newMap = new HashMap<String, String>();
+		for (Map.Entry<String, String> entry : curMap.entrySet()){
+			int sX = Integer.parseInt(entry.getKey().split(",")[0]);
+			int sY = Integer.parseInt(entry.getKey().split(",")[1]);
+			
+			if(sX-pl == tX && sY == tY){
+				return entry.getValue()+",,,"+entry.getKey()+",,,"+(sX-pl)+","+sY;
+			}
+			if(sX+pl == tX && sY == tY){
+				return entry.getValue()+",,,"+entry.getKey()+",,,"+(sX+pl)+","+sY;
+			}
+			if(sX == tX && sY-pk == tY){
+				return entry.getValue()+",,,"+entry.getKey()+",,,"+sX+","+(sY-pk);
+			}
+			if(sX == tX && sY+pk == tY){
+				return entry.getValue()+",,,"+entry.getKey()+",,,"+sX+","+(sY+pk);
+			}
+			
+			if(isOccupied(sX-pl, sY) && !beenToIm.containsKey((sX-pl)+","+sY)){
+				beenToIm.put((sX-pl)+","+sY,"");
+				newMap.put((sX-pl)+","+sY, entry.getValue()+",,,"+entry.getKey());
+			}			
+			if(isOccupied(sX+pl, sY) && !beenToIm.containsKey((sX+pl)+","+sY)){
+				beenToIm.put((sX+pl)+","+sY,"");
+				newMap.put((sX+pl)+","+sY, entry.getValue()+",,,"+entry.getKey());
+			}
+			if(isOccupied(sX, sY-pk) && !beenToIm.containsKey(sX+","+(sY-pk))){
+				beenToIm.put(sX+","+(sY-pk),"");				
+				newMap.put(sX+","+(sY-pk), entry.getValue()+",,,"+entry.getKey());
+			}
+			if(isOccupied(sX, sY+pk)  && !beenToIm.containsKey(sX+","+(sY+pk))){
+				beenToIm.put(sX+","+(sY+pk), "");				
+				newMap.put(sX+","+(sY+pk), entry.getValue()+",,,"+entry.getKey());
+			}
+		}
+		if(newMap.size() == 0){
+			return null;
+		}
+		else{
+			return pathfindPuzzle(tX, tY, newMap);
+		}		
+	}
+	
+	public static double calculateDistance(int tX, int tY, int sX, int sY){
+		return Math.sqrt((Math.pow(Math.abs(sX - tX),2)+      Math.pow(Math.abs(sY - tY),2)));
+	}
+	
 	/**
-	 * Counter-clockwise algorithm to find a parking spot where to place the next car
+	 * Finds a parking spot in a counter-clockwise direction and where to place the next car
+	 * @param ignore 
 	 * @param curX current coordinate
 	 * @param curY current coordinate
 	 * @param stepX which way the algorithm looks for the next step
 	 * @param stepY which way the algorithm looks for the next step
 	 * @return the target parking spot where to place the car
 	 */
-	public static ParkingSpot getNextRound(int curX, int curY, int stepX, int stepY){
+	public static ParkingSpot getNextRound(int startX, int startY, int startStepX, int startStepY){
+		int curX = startX;
+		int curY = startY;
+		int stepX = startStepX;
+		int stepY = startStepY;
+		
+		boolean skip = false;
+		Map <Integer, String> loop = new HashMap<Integer, String>();
+		int loopCounter = 0;
 		Map <String, String> beenTo2 = new HashMap<String, String>();
-		beenTo2.put((curX-stepX)+","+(curY-stepY), "");
+		
 		int rightX;
 		int rightY;
 		int forwardX;
@@ -119,94 +279,133 @@ public class Algorithm implements Runnable{
 		int leftX;
 		int leftY;
 		while(true){
-			beenTo2.put(curX+","+curY, "");
+			if(skip == false){beenTo2.put(curX+","+curY, "");}else{skip = false;}		
 			if(stepX == -pl){
-				rightX = 0;
-				rightY = -pk;
-				forwardX = -pl;
-				forwardY = 0;
-				leftX = 0;
-				leftY = pk;
+				rightX = 0;rightY = -pk;forwardX = -pl;forwardY = 0;leftX = 0;leftY = pk;
 			}
 			else if(stepX == pl){
-				rightX = 0;
-				rightY = pk;
-				forwardX = pl;
-				forwardY = 0;
-				leftX = 0;
-				leftY = -pk;
+				rightX = 0;	rightY = pk;forwardX = pl;forwardY = 0;leftX = 0;leftY = -pk;
 			}
 			else if(stepY == -pk){
-				rightX = pl;
-				rightY = 0;
-				forwardX = 0;
-				forwardY = -pk;
-				leftX = -pl;
-				leftY = 0;
+				rightX = pl;rightY = 0;forwardX = 0;forwardY = -pk;leftX = -pl;leftY = 0;
 			}
 			else{
-				rightX = -pl;
-				rightY = 0;
-				forwardX = 0;
-				forwardY = pk;
-				leftX = pl;
-				leftY = 0;
+				rightX = -pl;rightY = 0;forwardX = 0;forwardY = pk;leftX = pl;leftY = 0;
 			}
-			if(isParking(curX+rightX, curY+rightY) && !beenTo2.containsKey((curX+rightX)+","+(curY+rightY))){
+			
+			if(curX+rightX == startX && curY+rightY == startY){
+				curX = startX;
+				curY = startY;
+				stepX = startStepX;
+				stepY = startStepY;
+			}
+			else if(isParking(curX+rightX, curY+rightY) && !beenTo2.containsKey((curX+rightX)+","+(curY+rightY))){
 				if(isVacant(curX+rightX, curY+rightY)){
 					Map <String, String> map = new HashMap<String, String>();
 					map.put(gateX+","+gateY, "");
 					beenTo.clear();
-					if((pathfind(curX+rightX, curY+rightY, map)) != null){
+					if((pathfind(curX+rightX, curY+rightY, map, false)) != null){
 						if(checkSides(curX+rightX, curY+rightY)){
 							return ParkingSpotManager.getParking(curX+rightX, curY+rightY);
 						}
 						else{
-							curX = curX+rightX;curY = curY+rightY;stepX = rightX;stepY = rightY;
+							curX = curX+rightX;curY = curY+rightY;stepX = rightX;stepY = rightY;skip = true;
 						}
 					}
-					else{System.out.println("ERROR UNKNOWN STUFF HAPPENED HERE CHECK HERE");}
+					else{return null;}
 				}
 				else{					
 					curX = curX+rightX;curY = curY+rightY;stepX = rightX;stepY = rightY;
 				}
+			}
+			else if(curX+forwardX == startX && curY+forwardY == startY){	
+				curX = startX;
+				curY = startY;
+				stepX = startStepX;
+				stepY = startStepY;
 			}
 			else if(isParking(curX+forwardX, curY+forwardY) && !beenTo2.containsKey((curX+forwardX)+","+(curY+forwardY))){
 				if(isVacant(curX+forwardX, curY+forwardY)){
 					Map <String, String> map = new HashMap<String, String>();
 					map.put(gateX+","+gateY, "");
 					beenTo.clear();
-					if((pathfind(curX+forwardX, curY+forwardY, map)) != null){
+					if((pathfind(curX+forwardX, curY+forwardY, map, false)) != null){
 						if(checkSides(curX+forwardX, curY+forwardY)){
 							return ParkingSpotManager.getParking(curX+forwardX, curY+forwardY);
 						}
 						else{
-							curX = curX+forwardX;curY = curY+forwardY;stepX = forwardX;stepY = forwardY;
+							curX = curX+forwardX;curY = curY+forwardY;stepX = forwardX;stepY = forwardY;skip = true;
 						}
 					}
-					else{System.out.println("ERROR UNKNOWN STUFF HAPPENED HERE CHECK HERE");}
+					else{return null;}
 				}
 				else{					
 					curX = curX+forwardX;curY = curY+forwardY;stepX = forwardX;stepY = forwardY;
 				}
+			}
+			else if(curX+leftX == startX && curY+leftY == startY){
+				curX = startX;
+				curY = startY;
+				stepX = startStepX;
+				stepY = startStepY;
 			}
 			else if(isParking(curX+leftX, curY+leftY) && !beenTo2.containsKey((curX+leftX)+","+(curY+leftY))){
 				if(isVacant(curX+leftX, curY+leftY)){
 					Map <String, String> map = new HashMap<String, String>();
 					map.put(gateX+","+gateY, "");
 					beenTo.clear();
-					if((pathfind(curX+leftX, curY+leftY, map)) != null){
+					if((pathfind(curX+leftX, curY+leftY, map, false)) != null){
 						if(checkSides(curX+leftX, curY+leftY)){
 							return ParkingSpotManager.getParking(curX+leftX, curY+leftY);	
 						}
 						else{
-							curX = curX+leftX;curY = curY+leftY;stepX = leftX;stepY = leftY;
+							curX = curX+leftX;curY = curY+leftY;stepX = leftX;stepY = leftY;skip = true;
 						}
 					}
-					else{System.out.println("ERROR UNKNOWN STUFF HAPPENED HERE CHECK HERE");}
+					else{return null;}
 				}
 				else{					
 					curX = curX+leftX;curY = curY+leftY;stepX = leftX;stepY = leftY;
+				}
+			}
+			else if(!(curX == startX && curY == startY)){
+				if(isParking(curX+rightX, curY+rightY) ){
+					stepX = rightX;
+					stepY = rightY;
+					curX = curX+rightX;
+					curY = curY+rightY;
+					
+					if(loop.containsValue(curX+","+curY)){
+						while(isParking(curX+forwardX, curY+forwardY)){
+							stepX = forwardX;
+							stepY = forwardY;
+							curX = curX+forwardX;
+							curY = curY+forwardY;
+						}
+						stepX = leftX;
+						stepY = leftY;
+						loop.clear();
+					}
+					else{
+						loop.put(loopCounter, curX+","+curY);
+						if(loopCounter == 3){loopCounter = 0;}else{loopCounter++;}
+					}
+				}
+				else if(isParking(curX+forwardX, curY+forwardY) ){
+					stepX = forwardX;
+					stepY = forwardY;
+					curX = curX+forwardX;
+					curY = curY+forwardY;
+				}
+				else if(isParking(curX+leftX, curY+leftY)){
+					stepX = leftX;
+					stepY = leftY;
+					curX = curX+leftX;
+					curY = curY+leftY;
+				}
+				else{
+					stepX = -stepX;
+					stepY = -stepY;
 				}
 			}
 			else{
@@ -222,13 +421,13 @@ public class Algorithm implements Runnable{
 	 * @return true if no blocking occurs
 	 */
 	private static boolean checkSides(int centerX, int centerY){
+		Map <String, String> map = new HashMap<String, String>();
+		map.put(gateX+","+gateY, "");
 		beenTo.clear();
 		beenTo.put(centerX+","+centerY, "");
 		if(isParking(centerX+pl, centerY)){
 			if(!isOccupied(centerX+pl, centerY)){
-				Map <String, String> map = new HashMap<String, String>();
-				map.put(gateX+","+gateY, "");
-				if((pathfind(centerX+pl, centerY, map)) == null){
+				if((pathfind(centerX+pl, centerY, map, false)) == null){
 					return false;
 				}
 			}
@@ -237,9 +436,7 @@ public class Algorithm implements Runnable{
 		beenTo.put(centerX+","+centerY, "");
 		if(isParking(centerX-pl, centerY)){
 			if(!isOccupied(centerX-pl, centerY)){
-				Map <String, String> map = new HashMap<String, String>();
-				map.put(gateX+","+gateY, "");
-				if((pathfind(centerX-pl, centerY, map)) == null){
+				if((pathfind(centerX-pl, centerY, map, false)) == null){
 					return false;
 				}
 			}
@@ -248,9 +445,7 @@ public class Algorithm implements Runnable{
 		beenTo.put(centerX+","+centerY, "");
 		if(isParking(centerX, centerY+pk)){
 			if(!isOccupied(centerX, centerY+pk)){
-				Map <String, String> map = new HashMap<String, String>();
-				map.put(gateX+","+gateY, "");
-				if((pathfind(centerX, centerY+pk, map)) == null){
+				if((pathfind(centerX, centerY+pk, map, false)) == null){
 					return false;
 				}
 			}
@@ -259,9 +454,7 @@ public class Algorithm implements Runnable{
 		beenTo.put(centerX+","+centerY, "");
 		if(isParking(centerX, centerY-pk)){
 			if(!isOccupied(centerX, centerY-pk)){
-				Map <String, String> map = new HashMap<String, String>();
-				map.put(gateX+","+gateY, "");
-				if((pathfind(centerX, centerY-pk, map)) == null){
+				if((pathfind(centerX, centerY-pk, map, false)) == null){
 					return false;
 				}
 			}
@@ -270,17 +463,44 @@ public class Algorithm implements Runnable{
 	}
 	
 	/**
+	 * Gets a parking spot with checkers algorithm
+	 * @param ignore 
+	 * @return the parking spot. Null if none is found.
+	 */
+	public static ParkingSpot getEmptyCheckers(){
+		for (int i = 0; i<ParkingSpotManager.parkingSpotsOrdered.size(); i++) {
+			ParkingSpot parkingSpot = ParkingSpotManager.parkingSpotsOrdered.get(i);
+			if(!parkingSpot.occupied()){
+				int curX = parkingSpot.getX();
+				int curY = parkingSpot.getY();
+				if(isMovable(curX+pl, curY)
+						&& isMovable(curX, curY+pk)
+						&& isMovable(curX-pl, curY)
+						&& isMovable(curX, curY-pk)
+						&& isMovable(curX-pl, curY-pk)
+						&& isMovable(curX+pl, curY-pk)
+						&& isMovable(curX-pl, curY+pk)
+						&& isMovable(curX+pl, curY+pk)){
+					
+					return parkingSpot;
+				}				
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Retrieves a car from the destination
 	 * @param robot the working robot
 	 * @param id the id of the car to retrieve
 	 */
-	private static void retrieve(Bot robot, int id){
-		ParkingSpot parkingSpot = ParkingSpotManager.retrieveOccupied(id);
+	private static void retrieve(Bot robot, ParkingSpot parkingSpot){		
 		if(parkingSpot.getX() != robot.getRobotX() || parkingSpot.getY() != robot.getRobotY()){
 			goTo(robot, parkingSpot.getX(), parkingSpot.getY());
 		}
 		robot.toggleColor();
 		colorParking(parkingSpot.getX(), parkingSpot.getY());
+		ParkingSpotManager.getParking(parkingSpot.getX(), parkingSpot.getY()).vacate();
 		goTo(robot, gateX, gateY);
 		robot.toggleColor();
 	}
@@ -311,11 +531,11 @@ public class Algorithm implements Runnable{
 	 * @param targetY coordinate
 	 */
 	private static void goTo(Bot b, int targetX, int targetY){
-		System.out.println("Pathfinding from "+b.getRobotX()+" "+b.getRobotY()+" to "+targetX+" "+targetY);
+		//System.out.println("Pathfinding from "+b.getRobotX()+" "+b.getRobotY()+" to "+targetX+" "+targetY);
 		beenTo.clear();
 		Map <String, String> map = new HashMap<String, String>();
 		map.put(b.getRobotX()+","+b.getRobotY(), "");
-		String path = optimize("", pathfind(targetX, targetY, map).replace(",,,"+b.getRobotX()+","+b.getRobotY(), ""),  b.getRobotX()+"", b.getRobotY()+"", false, false);
+		String path = optimize("", pathfind(targetX, targetY, map, false).replace(",,,"+b.getRobotX()+","+b.getRobotY(), ""),  b.getRobotX()+"", b.getRobotY()+"", false, false);
 		
 		String[] waypoints = path.split(",,,");	
 		for (int i = 1; i < waypoints.length; i++) {
@@ -354,7 +574,7 @@ public class Algorithm implements Runnable{
 	 * @param curMap a map with one entry of which the key is the starting location as a String "24,57" and the value is an empty String "".
 	 * @return null if the path can not be found
 	 */
-	private static String pathfind(int tX, int tY, Map <String, String> curMap){
+	private static String pathfind(int tX, int tY, Map <String, String> curMap, boolean closest){
 		Map <String, String> newMap = new HashMap<String, String>();
 		for (Map.Entry<String, String> entry : curMap.entrySet()){
 			int sX = Integer.parseInt(entry.getKey().split(",")[0]);
@@ -389,12 +609,16 @@ public class Algorithm implements Runnable{
 				beenTo.put(sX+","+(sY+pk), "");				
 				newMap.put(sX+","+(sY+pk), entry.getValue()+",,,"+entry.getKey());
 			}
+			if(closest && (closestDist == 0 || closestDist > calculateDistance(tX, tY, sX, sY))){
+				closestDist = calculateDistance(tX, tY, sX, sY);
+				closestPath = entry.getValue()+",,,"+entry.getKey();
+			}
 		}
 		if(newMap.size() == 0){
 			return null;
 		}
 		else{
-			return pathfind(tX, tY, newMap);
+			return pathfind(tX, tY, newMap, closest);
 		}		
 	}
 	
