@@ -1494,6 +1494,7 @@ public class Main extends Application {
             					label_newUI_robotSlots.setText("Number of robot parking slots: " + roboSpaces);
             					//(new Thread(gg)).start();
 
+            					button_newUI_run.setDisable(true);
             					try{
             						// inform user of test results
             						int actual = Integer.parseInt(label_newUI_robotSlots.getText().split(" ")[label_newUI_robotSlots.getText().split(" ").length-1]);
