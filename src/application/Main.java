@@ -854,10 +854,45 @@ public class Main extends Application {
                
                 for (int i = 1; i<27; i++){
                 		legal_blocks.add(i);
-                        Block.textures[i] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + i + ".png"))));
+                		try{
+                			Block.textures[i] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + i + ".png"))));
+                		}
+                		catch(FileNotFoundException e){
+                			
+
+                			if(Block.isParking(i)){
+                    			Block.textures[i] = Color.DARKBLUE;
+                				
+                			}else if(i==Block._ROBOT_GATEWAY){
+
+                    			Block.textures[i] = Color.BLUEVIOLET;
+                			}else{
+                    			Block.textures[i] = Color.DARKGREEN;
+                				
+                			}
+                			
+                		}
                 }
-                Block.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r2.png")))); 
-                Block.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r.png")))); 
+                
+                Block.textures[Block._NO_BLOCK] = Color.TRANSPARENT;
+                Block.textures[Block._ROBOT_ROAD] = Color.AZURE;
+                Block.textures[Block._CONCRETE] = Color.BROWN;
+                Block.textures[Block._LEVEL_WALL] = Color.BLACK;
+                
+                try{
+                	Block.textures[48] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r2.png")))); 
+                }
+        		catch(FileNotFoundException e){
+        			Block.textures[48] = Color.GRAY;
+        		}
+
+                try{
+                	Block.textures[49] = new ImagePattern(new Image(new FileInputStream(new File("textures/" + "r.png"))));
+		        }
+				catch(FileNotFoundException e){
+					Block.textures[49] = Color.DARKGRAY;
+				} 
+                
                 //System.out.println("Done!");
         }
        
@@ -1052,8 +1087,10 @@ public class Main extends Application {
                     new FileChooser.ExtensionFilter("DAT", "*.dat")
                 );
             fileChooser.setTitle("Point to .dat file");
-            fileChooser.setInitialDirectory(new File("levels/"));
-
+            
+            if(new File("levels/").exists()){
+            	fileChooser.setInitialDirectory(new File("levels/"));
+            }
             final FileChooser imageChooser = new FileChooser();
             imageChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("All Images", "*.*"),

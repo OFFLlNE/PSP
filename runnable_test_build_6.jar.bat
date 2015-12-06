@@ -1,0 +1,1 @@
+java -Xss1500m -jar runnable_test_build_6.jar
