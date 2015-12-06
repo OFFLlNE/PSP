@@ -9,7 +9,7 @@ public class Simulation implements Runnable {
 	
 	protected static int numberOfCarsIn = 10;
 	protected static int numberOfCarsOut = 10;
-	protected static double botSpeed = 30.0; //1,6
+	protected static double botSpeed = 29.0; //1,6
 	protected static int numberOfbots = 1;
 	
 	public static boolean paused = false;
@@ -128,7 +128,7 @@ public class Simulation implements Runnable {
 	}
 	
 	public static boolean validateSpeed(double speed){
-    	if(1/(speed/(oneHourInMs/3600)) >0.1){
+    	if( 1/(speed/(oneHourInMs/3600)) >0.1){
     		return true;
     	}
     	else{
@@ -138,7 +138,7 @@ public class Simulation implements Runnable {
 	
 	public static double maxSpeed(){
 		double second = oneHourInMs/3600;
-    	return (1/0.1)*second;
+    	return ((1/0.1)*second)-1;
 	}
 	
 	public static void pause(){
