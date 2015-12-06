@@ -1352,8 +1352,11 @@ public class Main extends Application {
             				Block.suurus = uusSuurus;
             				canvas.setHeight(uusSuurus*level_height);
             				canvas.setWidth(uusSuurus*level_width);
-            				rectBG.setX(uusSuurus*level_height);
-            				rectBG.setY(uusSuurus*level_width);
+            				
+            				rectBG.setWidth(uusSuurus*level_width);
+            				rectBG.setHeight(uusSuurus*level_height);
+//            				rectBG.setX(uusSuurus*level_width);
+//            				rectBG.setY(uusSuurus*level_height);
             				
             				int x =  Integer.parseInt( field_image_width.getText() );
             				int y =  Integer.parseInt( field_image_height.getText() );
@@ -1581,7 +1584,8 @@ public class Main extends Application {
             simUI.add(simUI_field_explaination_hour_length, 4, 0);
             final NumberTextField simUI_field_hour_length = new NumberTextField();
             simUI.add(simUI_field_hour_length, 4, 1);
-            simUI_field_hour_length.setDisable(true);
+            
+            //simUI_field_hour_length.setDisable(true);
             
             final Button button_simUI_apply = new Button("Apply changes");
             simUI.add(button_simUI_apply, 5, 1);
@@ -1589,6 +1593,8 @@ public class Main extends Application {
                     new EventHandler<ActionEvent>() {
                    
                             @Override public void handle(ActionEvent e) {
+                            	Simulation.oneHourInMs = Integer.parseInt(simUI_field_hour_length.getText());
+                            	
                             	Simulation.numberOfCarsIn = Integer.parseInt(simUI_field_entering.getText());
                             	Simulation.numberOfCarsOut = Integer.parseInt(simUI_field_exiting.getText());
                             	double speed = Double.parseDouble(simUI_field_robo_speed.getText());
@@ -1602,8 +1608,9 @@ public class Main extends Application {
                             	}
                             	
                             	Simulation.numberOfbots = Integer.parseInt(simUI_field_robo_nr.getText());
-                            	Simulation.oneHourInMsChanged = true;
-                            	Simulation.oneHourInMsNew = Integer.parseInt(simUI_field_hour_length.getText());
+                            	
+//                            	Simulation.oneHourInMsChanged = true;
+//                            	Simulation.oneHourInMsNew = Integer.parseInt(simUI_field_hour_length.getText());
                             }
                     }
                 );
@@ -1616,6 +1623,8 @@ public class Main extends Application {
                             @Override public void handle(ActionEvent e) {
                             	if(button_simUI_run.getText().equals("Run")){
 
+                            	    field_zoom.setDisable(true);
+                            	    simUI_field_hour_length.setDisable(true);
                             		//Animation.stopped = false;
                             		button_simUI_run.setText("Running");
                                 	//Simulation.run();
@@ -1626,12 +1635,12 @@ public class Main extends Application {
 
                 					(new Thread(sim)).start();
                 					
-                					try {
-                					Thread.sleep(100);
-                				} 
-                				catch (InterruptedException ee) {
-                					System.out.println(ee);
-                				}
+//                					try {
+//                						Thread.sleep(1000);
+//	                				} 
+//	                				catch (InterruptedException ee) {
+//	                					System.out.println(ee);
+//	                				}
                 					
                 					
                 					(new Thread(algorithm_thread)).start();

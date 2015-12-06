@@ -7,9 +7,9 @@ public class Simulation implements Runnable {
 	
 	protected static int oneHourInMs = 12000;
 	
-	protected static int numberOfCarsIn = 10;
+	protected static int numberOfCarsIn = 20;
 	protected static int numberOfCarsOut = 10;
-	protected static double botSpeed = 29.0; //1,6
+	protected static double botSpeed = 1.6; //1,6
 	protected static int numberOfbots = 1;
 	
 	public static boolean paused = false;
@@ -27,7 +27,7 @@ public class Simulation implements Runnable {
 			System.out.println("-----------------------------------------------------------");
 			System.out.println("New hour has begun");
 			Main.updateHourLabel();
-			System.out.println("tasks: "+Algorithm.tasks);
+			System.out.println("Undone tasks in buffer: "+Algorithm.tasks.size());
 			System.out.println("-----------------------------------------------------------");
 			
 			int nrOfComms = numberOfCarsIn+numberOfCarsOut;
@@ -46,6 +46,14 @@ public class Simulation implements Runnable {
 				delays[delays.length-1] = oneHourInMs/(numberOfCarsIn+numberOfCarsOut);
 			}
 			
+			if(delays.length <= 0){
+				try {
+					Thread.sleep(oneHourInMs);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			
 			//System.out.println(Algorithm.tasks);
 			for(int j = 0; j<nrOfComms; j++){
@@ -105,9 +113,12 @@ public class Simulation implements Runnable {
 				// wait
 				try {
 					//System.out.println("Waiting "+delays[j] + " before next car arrival/retrival.");
+
 					Thread.sleep(delays[j]);
 					Main.updateMinuteLabel((int)((delays[j]*60)/oneHourInMs));
-				} 
+					
+				}
+					
 				catch (Exception e) {
 					//e.printStackTrace();
 					System.out.println(e + " in simulation");

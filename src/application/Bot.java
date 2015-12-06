@@ -91,7 +91,7 @@ public class Bot extends Rectangle{
 	
    	public void moveRight(int distance){
    		
-		if (!this.isBusy){
+		if (!this.isBusy &&  Simulation.speedFormula(distance)>=0.1){
 			if(Simulation.botSpeed==0){
 				this.isBusy=true;
 				this.x = this.x+distance*Block.suurus;
@@ -115,7 +115,12 @@ public class Bot extends Rectangle{
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
 	        pathTransition.setCycleCount(1);
+	        try{
 	        pathTransition.play();
+	        }
+	        catch(Exception e){
+	        	System.out.println(e + " while playing animation");
+	        }
 
 	        pathTransition.onFinishedProperty().set(new EventHandler<ActionEvent>() {
 	            @Override 
@@ -157,7 +162,7 @@ public class Bot extends Rectangle{
    	
    	public void moveLeft(int distance){
    		
-		if (!this.isBusy){
+		if (!this.isBusy &&  Simulation.speedFormula(distance)>=0.1){
 			if(Simulation.botSpeed==0){
 				this.isBusy=true;
 				this.x = this.x-distance*Block.suurus;
@@ -178,7 +183,12 @@ public class Bot extends Rectangle{
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
 	        pathTransition.setCycleCount(1);
+	        try{
 	        pathTransition.play();
+	        }
+	        catch(Exception e){
+	        	System.out.println(e + " while playing animation");
+	        }
 
 	        pathTransition.onFinishedProperty().set(new EventHandler<ActionEvent>() {
 	            @Override 
@@ -220,7 +230,7 @@ public class Bot extends Rectangle{
 	}   	
    	public void moveUp(int distance){
    		
-		if (!this.isBusy){
+		if (!this.isBusy &&  Simulation.speedFormula(distance)>=0.1){
 			if(Simulation.botSpeed==0){
 				this.isBusy=true;
 				this.y = this.y-distance*Block.suurus;
@@ -242,7 +252,12 @@ public class Bot extends Rectangle{
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.NONE);
 	        pathTransition.setCycleCount(1);
+	        try{
 	        pathTransition.play();
+	        }
+	        catch(Exception e){
+	        	System.out.println(e + " while playing animation");
+	        }
 
 	        pathTransition.onFinishedProperty().set(new EventHandler<ActionEvent>() {
 	            @Override 
@@ -285,7 +300,7 @@ public class Bot extends Rectangle{
 
 	public void moveDown(int distance){
    		
-		if (!this.isBusy ){
+		if (!this.isBusy &&  Simulation.speedFormula(distance)>=0.1){
 			if(Simulation.botSpeed==0){
 				this.isBusy=true;
 				this.y = this.y+distance*Block.suurus;
@@ -306,8 +321,12 @@ public class Bot extends Rectangle{
 	        pathTransition.setNode(this);
 	        pathTransition.setOrientation(PathTransition.OrientationType.NONE);
 	        pathTransition.setCycleCount(1);
+	        try{
 	        pathTransition.play();
-
+	        }
+	        catch(Exception e){
+	        	System.out.println(e + " while playing animation");
+	        }
 	        pathTransition.onFinishedProperty().set(new EventHandler<ActionEvent>() {
 	            @Override 
 	            public void handle(ActionEvent actionEvent) {

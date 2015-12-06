@@ -73,23 +73,29 @@ public class Algorithm implements Runnable{
 		Bot r1 = Main.makeBot(gateX, gateY);
 		
 		while(!stopped){
-			//System.out.println(tasks.size());
 			
+			//System.out.println(tasks.size());
 			if(tasks.size() != 0){
 				String[] inf = tasks.get(0).split(",");				
 				ParkingSpot parkingSpot;
 				
-				if(inf.length != 1){
-					delivery(r1, inf[0], inf[1], new Date(Integer.parseInt(inf[2])), stepX, stepY);			
+				if(inf.length != 1){	
+					
+					delivery(r1, inf[0], inf[1], new Date(Integer.parseInt(inf[2])), stepX, stepY);
+					
+					
 				}
 				else{
+					
 					parkingSpot = ParkingSpotManager.retrieveOccupied(Integer.parseInt(inf[0]));
 					beenTo.clear();
 					
 					Map <String, String> map = new HashMap<String, String>();
 					map.put(r1.getRobotX()+","+r1.getRobotY(), "");
+
+					
 					if(pathfind(parkingSpot.getX(), parkingSpot.getY(), map, false) != null){
-						
+
 						retrieve(r1, parkingSpot);
 						tasks.remove(0);
 					}
@@ -101,7 +107,7 @@ public class Algorithm implements Runnable{
 			}
 			else{
 				try {
-					Thread.sleep(500);
+					Thread.sleep(1);
 				} catch (InterruptedException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -116,7 +122,7 @@ public class Algorithm implements Runnable{
 			deliver(robot, parkingSpot, custodian, model, expirationDate);
 			tasks.remove(0);
 		}
-		else if((parkingSpot = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY)) != null){
+		else if((parkingSpot = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY, null)) != null){
 			deliver(robot, parkingSpot, custodian, model, expirationDate);
 			tasks.remove(0);
 		}
@@ -148,7 +154,7 @@ public class Algorithm implements Runnable{
 		}
 	}
 	
-	public static String getDig(Bot b, ParkingSpot parkingSpot, int stepX, int stepY){
+	public static void getDig(Bot b, ParkingSpot parkingSpot, int stepX, int stepY){
 		int tX = parkingSpot.getX();
 		int tY = parkingSpot.getY();
 		closestPath = null;
@@ -158,35 +164,24 @@ public class Algorithm implements Runnable{
 		Map <String, String> map = new HashMap<String, String>();
 		map.put(b.getRobotX()+","+b.getRobotY(), "");
 		pathfind(tX, tY, map, true);
-		if(closestPath == null){return null;}
 		String[] parts = closestPath.split(",,,");
 		int sX = Integer.parseInt(parts[parts.length-1].split(",")[0]);
 		int sY = Integer.parseInt(parts[parts.length-1].split(",")[1]);
 		
 		map = new HashMap<String, String>();
 		map.put(sX+","+sY, "");
+		beenToIm.clear();
 		String path = pathfindPuzzle(tX, tY, map);
-		if(path == null){
-			return null;
-		}
 		
 		parts = path.split(",,,");
 		for(int i = 2; i<parts.length-1;i++){
-			ParkingSpot parkingSpot2;
-			if((parkingSpot2 = getEmptyCheckers()) != null){		
-			}
-			else if((parkingSpot2 = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY)) != null){
-			}
-			else{return null;}
-			move(b, Integer.parseInt(parts[i].split(",")[0]), Integer.parseInt(parts[i].split(",")[1]),
-					parkingSpot2.getX(), parkingSpot2.getY());
+			move(b, Integer.parseInt(parts[i].split(",")[0]), Integer.parseInt(parts[i].split(",")[1]), stepX, stepY);
 		}
 		retrieve(b, parkingSpot);
-		return "";
 	}
 	
-	private static void move(Bot robot, int sX, int sY, int tX, int tY){
-		goTo(robot, sX, sY);		
+	private static boolean move(Bot robot, int sX, int sY, int stepX, int stepY){
+		goTo(robot, sX, sY);
 		robot.toggleColor();
 		
 		ParkingSpot parkingSpot = ParkingSpotManager.getParking(sX, sY);
@@ -198,10 +193,19 @@ public class Algorithm implements Runnable{
 		
 		parkingSpot.vacate();
 		colorParking(sX, sY);
+		
+		ParkingSpot parkingSpot2;
+		if((parkingSpot2 = getEmptyCheckers()) == null){
+			parkingSpot2 = getNextRound(gateX+stepX, gateY+stepY, stepX, stepY, sX+","+sY);
+		}
+		int tX = parkingSpot2.getX();
+		int tY = parkingSpot2.getY();
+		
 		goTo(robot, tX, tY);
 		robot.toggleColor();
 		ParkingSpotManager.getParking(tX, tY).occupy(c, m, in, e, id);
 		colorOccupied(tX, tY);
+		return true;
 	}
 	
 	public static String pathfindPuzzle(int tX, int tY, Map <String, String> curMap){
@@ -255,13 +259,14 @@ public class Algorithm implements Runnable{
 	/**
 	 * Finds a parking spot in a counter-clockwise direction and where to place the next car
 	 * @param ignore 
+	 * @param ignore 
 	 * @param curX current coordinate
 	 * @param curY current coordinate
 	 * @param stepX which way the algorithm looks for the next step
 	 * @param stepY which way the algorithm looks for the next step
 	 * @return the target parking spot where to place the car
 	 */
-	public static ParkingSpot getNextRound(int startX, int startY, int startStepX, int startStepY){
+	public static ParkingSpot getNextRound(int startX, int startY, int startStepX, int startStepY, String ignore){
 		int curX = startX;
 		int curY = startY;
 		int stepX = startStepX;
@@ -271,6 +276,9 @@ public class Algorithm implements Runnable{
 		Map <Integer, String> loop = new HashMap<Integer, String>();
 		int loopCounter = 0;
 		Map <String, String> beenTo2 = new HashMap<String, String>();
+		if(ignore != null){
+			beenTo2.put(ignore, "");
+		}
 		
 		int rightX;
 		int rightY;
@@ -558,7 +566,7 @@ public class Algorithm implements Runnable{
 			}
 			while(b.isBusy){
 				try {
-					Thread.sleep(100);
+					Thread.sleep(1);
 				} 
 				catch (InterruptedException e) {
 					e.printStackTrace();
@@ -609,9 +617,14 @@ public class Algorithm implements Runnable{
 				beenTo.put(sX+","+(sY+pk), "");				
 				newMap.put(sX+","+(sY+pk), entry.getValue()+",,,"+entry.getKey());
 			}
-			if(closest && (closestDist == 0 || closestDist > calculateDistance(tX, tY, sX, sY))){
-				closestDist = calculateDistance(tX, tY, sX, sY);
-				closestPath = entry.getValue()+",,,"+entry.getKey();
+			if(closest && (closestDist == 0 || closestDist > calculateDistance(tX, tY, sX, sY))){				
+				Map<String, String> map = new HashMap<String, String>();
+				map.put(sX+","+sY, "");
+				beenToIm.clear();
+				if(pathfindPuzzle(tX, tY, map) != null){
+					closestDist = calculateDistance(tX, tY, sX, sY);
+					closestPath = entry.getValue()+",,,"+entry.getKey();
+				}				
 			}
 		}
 		if(newMap.size() == 0){
