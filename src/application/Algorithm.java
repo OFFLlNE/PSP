@@ -40,7 +40,7 @@ public class Algorithm implements Runnable{
 		fillSpotParking(gateX, gateY);
 		System.out.println("Done filling spots!");
 		
-		fillPixelParking();
+		//fillPixelParking();
 		System.out.println("Done filling pixels!");
 		
 		return ParkingSpotManager.parkingSpotsOrdered.size()+1;
@@ -756,16 +756,16 @@ public class Algorithm implements Runnable{
      * Fills uneven spots with parking spots.
      * @return 
      */
-    private static boolean fillPixelParking(){
-    	for(int i = 0; i<Main.level_width; i++){
-    		for(int j = 0; j<Main.level_height; j++){    			
-        		if(isInvisible(i, j)){
-        			createParkingSpot(i, j);
-        		}       		
-        	}
-    	}
-    	return true;
-    }
+//    private static boolean fillPixelParking(){
+//    	for(int i = 0; i<Main.level_width; i++){
+//    		for(int j = 0; j<Main.level_height; j++){    			
+//        		if(isInvisible(i, j)){
+//        			createParkingSpot(i, j);
+//        		}       		
+//        	}
+//    	}
+//    	return true;
+//    }
     
     //For internal use
   	private static String optimize(String out, String path, String left, String right, boolean l, boolean r){
