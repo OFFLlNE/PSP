@@ -90,6 +90,8 @@ public class Main extends Application {
     final static Label label_newUI_image = new Label("");
     final static Label label_newUI_dat = new Label("");
     final static Label simUI_hour_indicator = new Label("");
+    final static Rectangle rectBG = new Rectangle(0,0,Block.suurus*level_width,Block.suurus*level_height);
+    final static Canvas canvas = new Canvas(level_width*Block.suurus,level_height*Block.suurus);
     
 	static Algorithm algorithm_thread = new Algorithm();
     
@@ -585,8 +587,17 @@ public class Main extends Application {
     	silt5.setText("Laen...");
     	RandomAccessFile r = new RandomAccessFile(fail, "r");
 
-
-
+    	r.skipBytes(24000);
+    	int file_block_size = r.readInt();
+    	field_zoom.setText(file_block_size +"");
+    	
+    	Block.suurus = file_block_size;
+		canvas.setHeight(file_block_size*level_height);
+		canvas.setWidth(file_block_size*level_width);
+		rectBG.setWidth(file_block_size*level_width);
+		rectBG.setHeight(file_block_size*level_height);
+    	r.seek(0);
+    	
     	for(int i = 1; i<=level_height; i++){
     		for(int j = 1; j<=level_width; j++){
 
@@ -603,8 +614,8 @@ public class Main extends Application {
     		}
     		//System.out.println();
     	}
-
-    	field_zoom.setText(r.readInt() +"");
+    	
+    	r.readInt();
     	field_image_width.setText(r.readInt() +"");
     	field_image_height.setText(r.readInt() +"");
     	field_pencil_width.setText(r.readInt() +"");
@@ -1067,7 +1078,6 @@ public class Main extends Application {
             
 
  
-            final Canvas canvas = new Canvas(level_width*Block.suurus,level_height*Block.suurus);
             
             final GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -1373,8 +1383,6 @@ public class Main extends Application {
  
                
   
- 
-            final Rectangle rectBG = new Rectangle(0,0,Block.suurus*level_width,Block.suurus*level_height);
             rectBG.setFill(Color.TRANSPARENT);
             uus.getChildren().add(rectBG);
             
