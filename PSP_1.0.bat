@@ -1,1 +1,0 @@
-java -Xss1500m -jar PSP_1.0.jar
